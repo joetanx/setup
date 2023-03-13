@@ -1,0 +1,47 @@
+- !group
+  id: conjur-admins
+  owner: !policy root
+- !permit
+  role: !group conjur-admins
+  privileges: [ read, create, update ]
+  resource: !policy root
+- !group
+  id: vars-admins
+  owner: !policy root
+- !policy
+  id: db_cityapp
+  owner: !group vars-admins
+  body:
+  - &db_cityapp-variables
+    - !variable address
+    - !variable username
+    - !variable password
+  - !group consumers
+  - !permit
+    role: !group consumers
+    privilege: [ read, execute ]
+    resources: *db_cityapp-variables
+- !policy
+  id: db_cicd
+  owner: !group vars-admins
+  body:
+  - &db_cicd-variables
+    - !variable username
+    - !variable password
+  - !group consumers
+  - !permit
+    role: !group consumers
+    privilege: [ read, execute ]
+    resources: *db_cicd-variables
+- !policy
+  id: aws_api
+  owner: !group vars-admins
+  body:
+  - &aws_api-variables
+    - !variable awsakid
+    - !variable awssak
+  - !group consumers
+  - !permit
+    role: !group consumers
+    privilege: [ read, execute ]
+    resources: *aws_api-variables
