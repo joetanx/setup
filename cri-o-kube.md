@@ -230,7 +230,7 @@ Ref:
 - <https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-a-service-account-api-token>
 
 ```console
-curl -O https://raw.githubusercontent.com/joetanx/cri-o-kube/main/dashboard-serviceaccount.yaml
+curl -O https://raw.githubusercontent.com/joetanx/setup/main/dashboard-serviceaccount.yaml
 kubectl apply -f dashboard-serviceaccount.yaml
 ```
 
