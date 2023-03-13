@@ -1,4 +1,4 @@
-|   |   |
+|Topic|Link|
 |---|---|
 |Setup standalone Conjur Enterprise leader on Podman on RHEL 9.1 with base policies for MySQL and AWS credentials|https://github.com/joetanx/setup/blob/main/conjur.md|
 |Setup MySQL server with sample world database to use with Conjur demostrations|https://github.com/joetanx/setup/blob/main/mysql.md|
