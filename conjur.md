@@ -117,7 +117,7 @@ systemctl enable conjur
 - ☝️ **Note**: In event of `error: cert already in hash table`, ensure that the Conjur serverfollower certificates do not contain the CA certificate
 
 ```console
-curl -O https://raw.githubusercontent.com/joetanx/conjur-master/main/conjur-certs.tgz
+curl -O https://raw.githubusercontent.com/joetanx/setup/main/conjur-certs.tgz
 podman exec conjur mkdir -p /opt/cyberark/dap/certificates
 podman cp conjur-certs.tgz conjur:/opt/cyberark/dap/certificates/
 podman exec conjur tar xvf /opt/cyberark/dap/certificates/conjur-certs.tgz -C /opt/cyberark/dap/certificates/
@@ -154,13 +154,13 @@ conjur login -i admin -p CyberArk123!
 
 - Integration guides in my GitHub uses the secrets set in this step
 - Pre-requisites
-  - Setup MySQL database according to this guide: <https://github.com/joetanx/conjur-mysql>
+  - Setup MySQL database according to this guide: <https://github.com/joetanx/setup/blob/main/mysql.md>
   - Have an AWS IAM user account with programmatic access
 - Credentials are configured by `app-vars.yaml` in `world_db` and `aws_api` policies that are defined with the respective secret variables
 - Download the Conjur policies
 
 ```console
-curl -O https://raw.githubusercontent.com/joetanx/conjur-master/main/app-vars.yaml
+curl -O https://raw.githubusercontent.com/joetanx/setup/main/app-vars.yaml
 ```
 
 - Load the policies to Conjur
