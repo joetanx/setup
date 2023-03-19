@@ -96,15 +96,15 @@ More policy information: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/
 
 ![image](https://user-images.githubusercontent.com/90442032/226161360-69d5344b-b1f1-4c45-ba78-15198e5b4920.png)
 
-### 1.5.3. Attach IAM role to EC2 instance profile
+# 2. EC2 instance connection to RDS using IAM authentication
+
+## 2.1. Attach IAM role to EC2 instance profile
 
 Right-click instance → Security → Modify IAM Role
 
 ![image](https://user-images.githubusercontent.com/90442032/226161508-7816062b-520b-4189-a6d2-c57a6e3bcf02.png)
 
-# 2. EC2 instance connection to RDS using IAM authentication
-
-## 2.1. Test connection using AWS CLI + MySQL client
+## 2.2. Test connection using AWS CLI + MySQL client
 
 Setup AWS CLI and MySQL client:
 
@@ -126,3 +126,9 @@ mysql --host=$RDSHOST --port=3306 --user=cityapp --enable-cleartext-plugin --pas
 ☝️ Notice that no access key is needed for the `aws rds generate-db-auth-token` command; it automatically assumes the IAM role in the instance profile
 
 ## 2.2. Python + boto3
+
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.Python.html
+
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds.html
+
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds/client/generate_db_auth_token.html
