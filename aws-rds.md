@@ -46,21 +46,30 @@
 
 ## 1.3. Allow communication from EC2 instance to RDS (security groups)
 
-## 1.4. Configure RDS for IAM authentication
+![image](https://user-images.githubusercontent.com/90442032/226161649-59262056-c015-439e-9df8-bef43345e428.png)
 
-## 1.5. Create dbuser and setup world database
+## 1.4. Create dbuser and setup world database
 
-Login to RDS with master password
+Login to RDS with master password `mysql -h jtan-rds.a1b2c3d4e5f6.ap-southeast-1.rds.amazonaws.com -u admin -pCyberark1`
+
+Create database account and grant `admin` permissions to account:
+
+(For production best practice, define permissions only permissions that the account requires)
 
 ```console
-mysql -h jtan-rds.a1b2c3d4e5f6.ap-southeast-1.rds.amazonaws.com -u admin -pCyberark1
 CREATE USER cityapp IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS'; 
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER ON *.* TO 'cityapp'@'%';
 ```
 
-## 1.6. Setup EC2 instance profile
+## 1.5. Setup EC2 instance profile
 
-### 1.6.1. Create IAM policy
+### 1.5.1. Create IAM policy
+
+The `*/*` portion under `Resource` means it has `connect` permission to all DB instances and database accounts for a particular AWS account and AWS region
+
+(For production best practice, define permissions for only specific resources in specific accounts)
+
+More policy information: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.IAMPolicy.html
 
 ```json
 {
@@ -68,29 +77,52 @@ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES,
     "Statement": [
         {
             "Effect": "Allow",
-            "Action": [
-                "rds-db:connect"
-            ],
-            "Resource": [
-                "arn:aws:rds-db:ap-southeast-1:123412341234:dbuser:*/*"
-            ]
+            "Action": "rds-db:connect",
+            "Resource": "arn:aws:rds-db:ap-southeast-1:123412341234:dbuser:*/*"
         }
     ]
 }
 ```
 
-### 1.6.2. Create IAM role
+![image](https://user-images.githubusercontent.com/90442032/226161109-2671e63d-c92c-4191-8d2c-0b9654c5cef1.png)
 
-### 1.6.3. Attach IAM role to EC2 instance profile
+![image](https://user-images.githubusercontent.com/90442032/226161113-efd7c843-38b3-412c-9046-f4728b7084df.png)
+
+### 1.5.2. Create IAM role
+
+![image](https://user-images.githubusercontent.com/90442032/226161350-cafd392b-a052-4843-ac1d-41586087e35c.png)
+
+![image](https://user-images.githubusercontent.com/90442032/226161354-fab72b06-2792-41ee-8098-202e2e3c41a3.png)
+
+![image](https://user-images.githubusercontent.com/90442032/226161360-69d5344b-b1f1-4c45-ba78-15198e5b4920.png)
+
+### 1.5.3. Attach IAM role to EC2 instance profile
+
+Right-click instance → Security → Modify IAM Role
+
+![image](https://user-images.githubusercontent.com/90442032/226161508-7816062b-520b-4189-a6d2-c57a6e3bcf02.png)
 
 # 2. EC2 instance connection to RDS using IAM authentication
 
 ## 2.1. Test connection using AWS CLI + MySQL client
+
+Setup AWS CLI and MySQL client:
+
+```console
+yum -y install mysql unzip
+curl -O https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+unzip awscli-exe-linux-x86_64.zip
+./aws/install && rm -rf aws*
+```
+
+Generate IAM token and connect to RDS:
 
 ```console
 RDSHOST="jtan-rds.a1b2c3d4e5f6.ap-southeast-1.rds.amazonaws.com"
 TOKEN="$(aws rds generate-db-auth-token --hostname $RDSHOST --port 3306 --region ap-southeast-1 --username cityapp)"
 mysql --host=$RDSHOST --port=3306 --user=cityapp --enable-cleartext-plugin --password=$TOKEN
 ```
+
+☝️ Notice that no access key is needed for the `aws rds generate-db-auth-token` command; it automatically assumes the IAM role in the instance profile
 
 ## 2.2. Python + boto3
