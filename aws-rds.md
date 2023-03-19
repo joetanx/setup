@@ -44,11 +44,36 @@
 
 </details>
 
-## 1.3. Allow communication from EC2 instance to RDS (security groups)
+## 1.3. Allow communication to RDS (security groups)
+
+### 1.3.1. By connecting an EC2 instance
+
+This automatically creates security groups and add to both RDS and the selected EC2 instance
 
 ![image](https://user-images.githubusercontent.com/90442032/226161649-59262056-c015-439e-9df8-bef43345e428.png)
 
+### 1.3.2. By creating security group manually
+
+This allows other services such as Lambda that are on the VPC subnet to access RDS
+
+#### 1.3.2.1. Create security group
+
+![image](https://user-images.githubusercontent.com/90442032/226178343-bbf25d6e-e5a8-483b-9995-533e3a4d83ab.png)
+
+#### 1.3.2.2. Add security group to RDS
+
+`Modify` the RDS and add the security group created
+
+![image](https://user-images.githubusercontent.com/90442032/226178344-862e5a7d-63b7-4bb5-93b3-1247af0503e8.png)
+
 ## 1.4. Create dbuser and setup world database
+
+Download MySQL sample world database:
+
+```console
+curl -L -O https://downloads.mysql.com/docs/world-db.tar.gz
+tar xvf world-db.tar.gz
+```
 
 Login to RDS with master password `mysql -h jtan-rds.a1b2c3d4e5f6.ap-southeast-1.rds.amazonaws.com -u admin -pCyberark1`
 
@@ -59,11 +84,10 @@ Create database account and grant `admin` permissions to account:
 ```console
 CREATE USER cityapp IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS'; 
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER ON *.* TO 'cityapp'@'%';
+SOURCE ~/world-db/world.sql
 ```
 
-## 1.5. Setup EC2 instance profile
-
-### 1.5.1. Create IAM policy
+## 1.5. Create IAM policy
 
 The `*/*` portion under `Resource` means it has `connect` permission to all DB instances and database accounts for a particular AWS account and AWS region
 
@@ -84,11 +108,15 @@ More policy information: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/
 }
 ```
 
-![image](https://user-images.githubusercontent.com/90442032/226161109-2671e63d-c92c-4191-8d2c-0b9654c5cef1.png)
+![image](https://user-images.githubusercontent.com/90442032/226177409-85b3e559-0031-4356-81c0-fe8822b67517.png)
 
 ![image](https://user-images.githubusercontent.com/90442032/226161113-efd7c843-38b3-412c-9046-f4728b7084df.png)
 
-### 1.5.2. Create IAM role
+# 2. EC2 instance connection to RDS using IAM authentication
+
+## 2.1. Setup EC2 instance profile
+
+### 2.1.1. Create IAM role
 
 ![image](https://user-images.githubusercontent.com/90442032/226161350-cafd392b-a052-4843-ac1d-41586087e35c.png)
 
@@ -96,9 +124,7 @@ More policy information: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/
 
 ![image](https://user-images.githubusercontent.com/90442032/226161360-69d5344b-b1f1-4c45-ba78-15198e5b4920.png)
 
-# 2. EC2 instance connection to RDS using IAM authentication
-
-## 2.1. Attach IAM role to EC2 instance profile
+### 2.1.2. Attach IAM role to EC2 instance profile
 
 Right-click instance → Security → Modify IAM Role
 
