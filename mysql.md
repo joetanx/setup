@@ -44,7 +44,7 @@ ALTER USER 'root' IDENTIFIED BY 'Cyberark1';
 - Verify users
 
 ```console
-SELECT user,host FROM mysql.user;
+SELECT user,host,plugin FROM mysql.user;
 ```
 
 - Load sample world database
