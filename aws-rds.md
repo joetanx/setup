@@ -173,7 +173,7 @@ import mysql.connector
 import boto3
 import os
 
-ENDPOINT="jtan-rds.cusiivm6n9hm.ap-southeast-1.rds.amazonaws.com"
+ENDPOINT="jtan-rds.a1b2c3d4e5f6.ap-southeast-1.rds.amazonaws.com"
 PORT=3306
 USER="cityapp"
 REGION="ap-southeast-1"
