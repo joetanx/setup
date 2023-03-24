@@ -153,8 +153,57 @@ mysql --host=$RDSHOST --port=3306 --user=cityapp --enable-cleartext-plugin --pas
 
 ## 2.2. Python + boto3
 
-https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.Python.html
+Ref: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.Python.html
 
-https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds.html
+Prepare python packages:
 
-https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds/client/generate_db_auth_token.html
+```console
+yum -y install python3-pip
+pip install mysql-connector-python boto3
+```
+
+### Sample python script
+
+- The AWS boto3 SDK [credentials can be configured in multiple ways](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html), when the session is called with empty arguments `session = boto3.Session()`, it uses the instance metadata service
+- With the session created, we can then [setup a client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds.html) and [generate database authentication token](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds/client/generate_db_auth_token.html)
+- The remain code use the token to connect to the database and retrieve a random row
+
+```python
+import mysql.connector
+import boto3
+import os
+
+ENDPOINT="jtan-rds.cusiivm6n9hm.ap-southeast-1.rds.amazonaws.com"
+PORT=3306
+USER="cityapp"
+REGION="ap-southeast-1"
+DBNAME="world"
+os.environ['LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN'] = '1'
+
+session = boto3.Session()
+client = session.client('rds',region_name=REGION)
+token = client.generate_db_auth_token(DBHostname=ENDPOINT, Port=PORT, DBUsername=USER, Region=REGION)
+
+db = mysql.connector.connect(
+  host=ENDPOINT,
+  user=USER,
+  password=token,
+  database=DBNAME
+)
+
+cursor = db.cursor()
+
+cursor.execute("SELECT city.Name as City,country.name as Country,city.District,city.Population FROM city,country WHERE city.CountryCode = country.Code ORDER BY RAND() LIMIT 0,1")
+
+result = cursor.fetchall()
+
+for x in result:
+  print(x)
+```
+
+### Sample output:
+
+```console
+[root@ip-192-168-94-94 ~]# python select_mysql.py
+('Yantai', 'China', 'Shandong', 452127)
+```
