@@ -192,7 +192,6 @@ module.exports.function1('test')
 
 Output:
 - Printing `module` shows the updated content from `module.exports`, but printing `exports` still have the same content from earlier
-- 
 - ☝️ When uninitialized, `module.exports` points to `exports` and hence, has the content from `exports`
   - When `module.exports` is assigned explicitly, it no longer points to `exports` → `module.exports` and `exports` are then separate objects with their own contents
 - Function `function1` can be called with `module.exports.function1(...)` and the argument `test` is ignored since the function doesn't use it
