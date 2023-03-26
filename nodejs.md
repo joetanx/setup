@@ -247,3 +247,46 @@ Module {
 50
 100
 ```
+
+## Another example
+
+#### display.js
+
+```js
+const messenger = function (message) {
+  console.log(message)
+}
+const prefix = 'My name is:'
+module.exports = {prefix,messenger}
+```
+
+#### name.js
+
+```js
+module.exports = function (firstName,lastName) {
+  this.firstName = firstName
+  this.lastName = lastName
+  this.fullName = function () { 
+    return this.firstName + ' ' + this.lastName
+  }
+}
+```
+
+#### app.js
+
+Export function as a class
+
+```js
+const showMessage = require('./display.js')
+const getName = require('./name.js')
+const myName = new getName('James', 'Bond')
+showMessage.messenger(showMessage.prefix)
+showMessage.messenger(myName.fullName())
+```
+
+#### Output
+
+```console
+My name is:
+James Bond
+```
