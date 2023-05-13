@@ -1,16 +1,16 @@
 ## 0. Setting up a single-node Openshift
 
-There are several methods to setup Openshift, depending on the [platforms](https://docs.openshift.com/container-platform/4.12/installing/index.html#supported-platforms-for-openshift-clusters_ocp-installation-overview) to be deployed on.
+There are a few methods to setup Openshift, depending on the [platforms](https://docs.openshift.com/container-platform/4.12/installing/index.html#supported-platforms-for-openshift-clusters_ocp-installation-overview) to be deployed on.
 
-This guide is based on setting up a **single-node Openshift (SNO)** on a Hyper-V (or any other) virtual machine
+This guide is for setting up a **single-node Openshift (SNO)** on Hyper-V (or any other) virtual machine
 
-There are 2 methods of setup for such environment:
+There are 2 methods for such environment:
 
 1. [Assisted Installer](https://docs.openshift.com/container-platform/4.12/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-using-the-assisted-installer)
 
 2. [Agent-based Installer](https://docs.openshift.com/container-platform/4.12/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-manually)
 
-In short, the 2 options means selecting `Create Cluster` for Assisted Installer or selecting `Run Agent-based Installer locally` for Agent-based Installer in the Create Cluster page:
+In short, select `Create Cluster` for Assisted Installer or `Run Agent-based Installer locally` for Agent-based Installer in the Create Cluster page:
 
 ![image](https://github.com/joetanx/setup/assets/90442032/17a06356-0d48-4e31-809e-a5eed44c6c2b)
 
