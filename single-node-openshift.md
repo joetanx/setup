@@ -170,3 +170,21 @@ The target VM boots into RHCOS and will take a few moments to discover itself:
 The installation process will start automatically once the discovery is completed:
 
 ![image](https://github.com/joetanx/setup/assets/90442032/8d438050-d7df-4bbe-9fd5-198e40c5a01e)
+
+### 2.2. Installation completed
+
+The VM will reboot twice during the installation process
+
+It will look nothing is happening after the second reboot, but it is in fact still running the setup procedure
+
+After about an hour, the cluster registration on https://console.redhat.com/ should complete and show its status:
+
+![image](https://github.com/joetanx/setup/assets/90442032/7538fba9-dcc0-4152-a5b8-9c0721c9aaaf)
+
+The cluster management page can be accessed at https://console-openshift-console.apps.cluster-domain/
+
+![image](https://github.com/joetanx/setup/assets/90442032/f9b038d8-3c1f-4e8d-a1ff-e629ea1e6b16)
+
+> **Note**
+>
+> DNS conditional forwarder needs to be configured in the environment DNS server to forward requests for `*.cluster-domain` to the SNO
