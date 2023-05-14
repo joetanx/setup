@@ -1,24 +1,16 @@
-## 0. Setting up a single-node Openshift
+## 1. Setup single-node Openshift with agent-based installer
 
-There are a few methods to setup Openshift, depending on the [platforms](https://docs.openshift.com/container-platform/4.12/installing/index.html#supported-platforms-for-openshift-clusters_ocp-installation-overview) to be deployed on.
+Openshift can be deployed on various [platforms](https://docs.openshift.com/container-platform/4.12/installing/index.html#supported-platforms-for-openshift-clusters_ocp-installation-overview)
 
-This guide is for setting up a **single-node Openshift (SNO)** on Hyper-V (or any other) virtual machine
+This guide walks through the [agent-based installer](https://docs.openshift.com/container-platform/4.12/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-manually) method, which is suitable for generic VM-based installation
 
-There are 2 methods for such environment:
+### 1.1. Download the installer and pull secret:
 
-1. [Assisted Installer](https://docs.openshift.com/container-platform/4.12/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-using-the-assisted-installer)
-
-2. [Agent-based Installer](https://docs.openshift.com/container-platform/4.12/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-manually)
-
-In short, select `Create Cluster` for Assisted Installer or `Run Agent-based Installer locally` for Agent-based Installer in the Create Cluster page:
+Select `Run Agent-based Installer locally` in the `Create Cluster` page:
 
 ![image](https://github.com/joetanx/setup/assets/90442032/17a06356-0d48-4e31-809e-a5eed44c6c2b)
 
-This guide walks through the **Agent-based Installer** method
-
-## 1. Prepare the Agent Installer ISO
-
-### 1.1. Download the installer and pull secret:
+Download the installer and pull secret:
 
 ![image](https://github.com/joetanx/setup/assets/90442032/1abc902b-4028-4b0f-98bc-b665b62e7f1c)
 
@@ -121,7 +113,7 @@ openshift-install
 
 Check the unpacked files and note that `install-config.yaml` and `agent-config.yaml` are in the same directory as `openshift-install`
 
-```
+```console
 [root@foxtrot ~]# ls -lh
 total 2.0G
 -rw-r--r--. 1 root root  760 May 14 08:01 agent-config.yaml
@@ -159,9 +151,16 @@ total 16K
 -rw-r-----. 1 root root 8.8K May 14 08:00 kubeconfig
 ```
 
-## 2. Installing Openshift with the Agent Installer ISO
+### 1.4. Boot the target VM to the agent installer ISO
 
-### 2.1. Boot the target VM to the generated Agent Installer ISO
+Specifications of the SNO VM:
+
+|Specification|Size|Remarks|
+|---|---|---|
+|vCPU|8||
+|Memory|16GB||
+|/dev/sda|120GB||
+|/dev/sdb|120GB|Persistent storage for image registry|
 
 The target VM boots into RHCOS and will take a few moments to discover itself:
 
@@ -171,11 +170,11 @@ The installation process will start automatically once the discovery is complete
 
 ![image](https://github.com/joetanx/setup/assets/90442032/8d438050-d7df-4bbe-9fd5-198e40c5a01e)
 
-### 2.2. Installation completed
+### 1.5. Installation completed
 
 The VM will reboot twice during the installation process
 
-It will look nothing is happening after the second reboot, but it is in fact still running the setup procedure
+It will look nothing is happening after the second reboot, but it is still running the setup
 
 After about an hour, the cluster registration on https://console.redhat.com/ should complete and show its status:
 
@@ -188,3 +187,5 @@ The cluster management page can be accessed at https://console-openshift-console
 > **Note**
 >
 > DNS conditional forwarder needs to be configured in the environment DNS server to forward requests for `*.cluster-domain` to the SNO
+
+## 2. Configure image registry
