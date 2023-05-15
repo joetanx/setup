@@ -389,3 +389,63 @@ node-ca-642vg                                     1/1     Running   1          1
 ```
 
 ## 3. Test app deployment
+
+Let's deploy a sample web server application to verify that the cluster and image registry are functional
+
+The sample web server application will be deployed via templates which uses the [Source-to-image](https://docs.openshift.com/container-platform/4.12/openshift_images/using_images/using-s21-images.html) (S2I) to build the image, and deploy the image into pods
+
+Go to `Developer` view:
+
+![image](https://github.com/joetanx/setup/assets/90442032/951ed605-47d3-43e4-8b11-0ff591cfdd69)
+
+Select `Create Project` in the project drop down menu:
+
+![image](https://github.com/joetanx/setup/assets/90442032/0816b79e-23ec-45f4-a479-5d6301f4c265)
+
+Give the project a name (e.g. `httpd`):
+
+![image](https://github.com/joetanx/setup/assets/90442032/85bb417e-5bac-4bd0-93e8-65aa117bb52d)
+
+Select `+Add` and browse `All services` under `Developer Catalog`:
+
+![image](https://github.com/joetanx/setup/assets/90442032/5a964773-0580-4677-a698-0705314b2520)
+
+Select `Apache HTTP Server` template:
+
+![image](https://github.com/joetanx/setup/assets/90442032/b2ade3bd-59cc-4422-b823-44759c3c3f98)
+
+Select `Instantiate Template`:
+
+![image](https://github.com/joetanx/setup/assets/90442032/56075622-cf5e-4af4-a508-27a44ec8e807)
+
+Accept defaults and click `Create`:
+
+![image](https://github.com/joetanx/setup/assets/90442032/4868a34e-1b04-426c-ab54-6f51f5f997cf)
+
+The build will start with `pending` status:
+
+![image](https://github.com/joetanx/setup/assets/90442032/e06ee394-9a65-467f-842f-53e1e39f729e)
+
+The build will change to `running` after pending for a short while:
+
+> **Note**
+> 
+> If the build is stuck at `pending`, select `View logs` to investigate; there can be few reasons for the build to be stuck (e.g. non-functional image registry)
+
+![image](https://github.com/joetanx/setup/assets/90442032/17713527-cc95-4086-819c-218ddb650d74)
+
+The build will `complete` after the S2I procedure is completed:
+
+![image](https://github.com/joetanx/setup/assets/90442032/8575abcd-cf46-416c-a381-9d3cc39b94f4)
+
+The deployment will proceed to create pods from the image:
+
+![image](https://github.com/joetanx/setup/assets/90442032/7492aaf2-91e1-45e9-b2a5-739c7d5d191d)
+
+The application is ready when the pod status change to `Running`
+
+![image](https://github.com/joetanx/setup/assets/90442032/921f943b-4243-4cb2-bf4b-5f861449e4db)
+
+Click on the `Location` URL to open the sample web page:
+
+![image](https://github.com/joetanx/setup/assets/90442032/375736e2-b24b-4a3b-a594-468b1fb31d51)
