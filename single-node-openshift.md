@@ -449,3 +449,116 @@ The application is ready when the pod status change to `Running`
 Click on the `Location` URL to open the sample web page:
 
 ![image](https://github.com/joetanx/setup/assets/90442032/375736e2-b24b-4a3b-a594-468b1fb31d51)
+
+## Appendix A. Troubleshooting kubelet certificate
+
+If the cluster is turned off (e.g. to conserve consumption), the cluster can become unfunctional when starting after some time
+
+A trail of `Error getting node` errors will be logged on the kubelet status:
+
+```console
+[core@sno ~]$ systemctl status kubelet
+● kubelet.service - Kubernetes Kubelet
+   Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: disabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+           └─01-kubens.conf, 10-mco-default-env.conf, 10-mco-default-madv.conf, 20-logging.conf, 20-nodenet.conf
+   Active: active (running) since Wed 2023-05-17 08:31:10 UTC; 28s ago
+  Process: 2467 ExecStartPre=/bin/rm -f /var/lib/kubelet/memory_manager_state (code=exited, status=0/SUCCESS)
+  Process: 2465 ExecStartPre=/bin/rm -f /var/lib/kubelet/cpu_manager_state (code=exited, status=0/SUCCESS)
+  Process: 2463 ExecStartPre=/bin/mkdir --parents /etc/kubernetes/manifests (code=exited, status=0/SUCCESS)
+ Main PID: 2469 (kubelet)
+    Tasks: 19 (limit: 101898)
+   Memory: 127.7M
+      CPU: 1.921s
+   CGroup: /system.slice/kubelet.service
+           └─2469 /usr/bin/kubelet --config=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig --kubeconfig=/var/lib/kubelet/kubeconfig --container-runtime=remote --container-runti>
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.553161    2469 kubelet.go:2471] "Error getting node" err="node \"sno\" not found"
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.570304    2469 event.go:267] Server rejected event '&v1.Event{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""}, ObjectMeta:v1.ObjectMeta{Name:"etcd-sno.175f>
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.653358    2469 kubelet.go:2471] "Error getting node" err="node \"sno\" not found"
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.754047    2469 kubelet.go:2471] "Error getting node" err="node \"sno\" not found"
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.768191    2469 event.go:267] Server rejected event '&v1.Event{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""}, ObjectMeta:v1.ObjectMeta{Name:"etcd-sno.175f>
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.854999    2469 kubelet.go:2471] "Error getting node" err="node \"sno\" not found"
+May 17 08:31:38 sno kubenswrapper[2469]: I0517 08:31:38.952113    2469 csi_plugin.go:993] Failed to contact API server when waiting for CSINode publishing: csinodes.storage.k8s.io "sno" is forbidden: User "sy>
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.955330    2469 kubelet.go:2471] "Error getting node" err="node \"sno\" not found"
+May 17 08:31:38 sno kubenswrapper[2469]: E0517 08:31:38.967940    2469 event.go:267] Server rejected event '&v1.Event{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""}, ObjectMeta:v1.ObjectMeta{Name:"etcd-sno.175f>
+May 17 08:31:39 sno kubenswrapper[2469]: E0517 08:31:39.055449    2469 kubelet.go:2471] "Error getting node" err="node \"sno\" not found"
+```
+
+The node will also be in a `NotReady` state:
+
+```console
+[core@sno ~]$ oc get nodes
+NAME   STATUS     ROLES                         AGE     VERSION
+sno    NotReady   control-plane,master,worker   2d20h   v1.25.8+37a9a08
+```
+
+A common cause of this is due to the expiry of kubelet certificates
+
+The kubelet certificates generated from the SNO installation has a validity of about 13 hours for some reason:
+
+```console
+[core@sno ~]$ ls -l /var/lib/kubelet/pki/
+total 8
+-rw-------. 1 root root 1139 May 14 12:26 kubelet-client-2023-05-14-12-26-39.pem
+lrwxrwxrwx. 1 root root   59 May 14 12:26 kubelet-client-current.pem -> /var/lib/kubelet/pki/kubelet-client-2023-05-14-12-26-39.pem
+-rw-------. 1 root root 1167 May 14 12:26 kubelet-server-2023-05-14-12-26-55.pem
+lrwxrwxrwx. 1 root root   59 May 14 12:26 kubelet-server-current.pem -> /var/lib/kubelet/pki/kubelet-server-2023-05-14-12-26-55.pem
+[core@sno ~]$ sudo openssl x509 -noout -enddate -in /var/lib/kubelet/pki/kubelet-client-current.pem
+notAfter=May 15 01:59:46 2023 GMT
+[core@sno ~]$ sudo openssl x509 -noout -enddate -in /var/lib/kubelet/pki/kubelet-server-current.pem
+notAfter=May 15 01:59:46 2023 GMT
+```
+
+The certificate should be rotated automatically when it reaches 80 percent of its validity
+
+But if the cluster is turned off when it was due for certificate rotation, the certificate expires
+
+Kubelet will request for new certificates, but it is left as `pending` and needs manual approval:
+
+```console
+[core@sno ~]$ oc get csr
+NAME                                             AGE     SIGNERNAME                                    REQUESTOR                                                                         REQUESTEDDURATION   CONDITION
+csr-f4zmj                                        2d20h   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
+csr-r7zc2                                        2d20h   kubernetes.io/kubelet-serving                 system:node:sno                                                                   <none>              Approved,Issued
+csr-thn42                                        58s     kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
+system:openshift:openshift-authenticator-t2hnf   2d20h   kubernetes.io/kube-apiserver-client           system:serviceaccount:openshift-authentication-operator:authentication-operator   <none>              Approved,Issued
+system:openshift:openshift-monitoring-z4gd5      2d20h   kubernetes.io/kube-apiserver-client           system:serviceaccount:openshift-monitoring:cluster-monitoring-operator            <none>              Approved,Issued
+```
+
+Approve the first request from `system:serviceaccount:openshift-machine-config-operator:node-bootstrapper`:
+
+```console
+[core@sno ~]$ oc adm certificate approve csr-thn42
+certificatesigningrequest.certificates.k8s.io/csr-thn42 approved
+```
+
+After the first certificate is approved, kubelet will re-initialize and request for a second certificate after some time (about 3-5 mins):
+
+```console
+[core@sno ~]$ oc get csr
+NAME                                             AGE     SIGNERNAME                                    REQUESTOR                                                                         REQUESTEDDURATION   CONDITION
+csr-f4zmj                                        2d20h   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
+csr-n2mkk                                        11s     kubernetes.io/kubelet-serving                 system:node:sno                                                                   <none>              Pending
+csr-r7zc2                                        2d20h   kubernetes.io/kubelet-serving                 system:node:sno                                                                   <none>              Approved,Issued
+csr-thn42                                        3m45s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
+system:openshift:openshift-authenticator-t2hnf   2d20h   kubernetes.io/kube-apiserver-client           system:serviceaccount:openshift-authentication-operator:authentication-operator   <none>              Approved,Issued
+system:openshift:openshift-monitoring-z4gd5      2d20h   kubernetes.io/kube-apiserver-client           system:serviceaccount:openshift-monitoring:cluster-monitoring-operator            <none>              Approved,Issued
+```
+
+Approve the second request from `system:node:sno`:
+
+```console
+[core@sno ~]$ oc adm certificate approve csr-n2mkk
+certificatesigningrequest.certificates.k8s.io/csr-n2mkk approved
+```
+
+Verify that the expiry of the new certificates:
+
+```console
+[core@sno ~]$ sudo openssl x509 -noout -enddate -in /var/lib/kubelet/pki/kubelet-client-current.pem
+notAfter=Jun 16 08:29:26 2023 GMT
+[core@sno ~]$ sudo openssl x509 -noout -enddate -in /var/lib/kubelet/pki/kubelet-server-current.pem
+notAfter=Jun 16 08:30:32 2023 GMT
+```
+
+After the new certificates are done, the SNO will take about 20-30 mins to do some work before the console is available
