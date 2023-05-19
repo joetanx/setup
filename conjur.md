@@ -2,24 +2,23 @@
 
 ### Software Versions
 
-- RHEL 9.1
-- Podman 4.2
-- Conjur Enterprise 12.9.0
+- RHEL 9.2
+- Podman 4.4.1
+- Conjur Enterprise 13.0
 
 # 1.0. Setup host prerequisites
 
 - Install Podman
-- Upload `conjur-appliance-Rls-v12.9.tar.gz` to the container host: contact your CyberArk representative to acquire the Conjur container image
+- Upload `conjur-appliance-Rls-v13.0.tar.gz` to the container host: contact your CyberArk representative to acquire the Conjur container image
 - Prepare data directories: these directories will be mounted to the Conjur container as volumes
 - Setup [Conjur CLI](https://github.com/cyberark/cyberark-conjur-cli): the client tool to interface with Conjur
 
 ```console
 yum -y install podman
-podman load -i conjur-appliance-Rls-v12.9.tar.gz && rm -f conjur-appliance-Rls-v12.9.tar.gz
+podman load -i conjur-appliance-Rls-v13.0.tar.gz && rm -f conjur-appliance-Rls-v13.0.tar.gz
 mkdir -p /opt/conjur/{security,config,backups,seeds,logs}
-curl -L -O https://github.com/cyberark/cyberark-conjur-cli/releases/download/v7.1.0/conjur-cli-rhel-8.tar.gz
-tar xvf conjur-cli-rhel-8.tar.gz && rm -f conjur-cli-rhel-8.tar.gz
-mv conjur /usr/local/bin/
+curl -L -o /usr/local/bin/conjur https://github.com/cyberark/conjur-cli-go/releases/download/v8.0.9/conjur_linux_amd64
+chmod +x /usr/local/bin/conjur
 ```
 
 ## 1.1. Note on SELinux and Container Volumes
@@ -54,7 +53,7 @@ podman run --name conjur -d \
 -v /opt/conjur/backups:/opt/conjur/backup:Z \
 -v /opt/conjur/seeds:/opt/cyberark/dap/seeds:Z \
 -v /opt/conjur/logs:/var/log/conjur:Z \
-localhost/conjur-appliance:12.9.0
+registry.tld/conjur-appliance:13.0.0.1
 ```
 
 ### 2.1.2. Method 2: Running Conjur master on the Podman host network
@@ -71,7 +70,7 @@ podman run --name conjur -d \
 -v /opt/conjur/backups:/opt/conjur/backup:Z \
 -v /opt/conjur/seeds:/opt/cyberark/dap/seeds:Z \
 -v /opt/conjur/logs:/var/log/conjur:Z \
-localhost/conjur-appliance:12.9.0
+registry.tld/conjur-appliance:13.0.0.1
 ```
 
 - Add firewall rules on the Podman host
