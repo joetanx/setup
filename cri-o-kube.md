@@ -113,7 +113,7 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ## 2.2. Install Flannel networking
 
 ```console
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 ```
 - In case of `"cni0" already has an IP address different from 10.244.0.1/24` error
   - This error occurs when you deploy a pod immediately after creating the Kubernetes cluster
