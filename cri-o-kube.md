@@ -4,9 +4,9 @@ Setup single-node Kubernetes cluster (with RHEL, CRI-O and Flannel)
 
 ### Software Versions
 
-- RHEL 9.1
-- CRI-O 1.26
-- Kubernetes 1.26
+- RHEL 9.2
+- CRI-O 1.27
+- Kubernetes 1.27
 
 # 1. Preparation
 
