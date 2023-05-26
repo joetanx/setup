@@ -181,3 +181,6 @@ openssl x509 -req -sha256 -days 365 -CA vxLabCA.pem -CAkey vxLabCA.key -CAcreate
 |Check EC private key|`openssl ec -check -in CERT.key`|
 |Check CSR|`openssl req -text -noout -verify -in CERT.csr`|
 |Check PKCS#12 file|`openssl pkcs12 -info -in CERT.pfx -nodes -passin pass:PASSWORD`|
+|Combine cert and files into pkcs12|`openssl pkcs12 -export -out CERT.pfx -inkey CERT.key -in CERT.pem -keysig -passout pass:PASSWORD`|
+|Extract cert from pkcs12|`openssl pkcs12 -in CERT.pfx -nokeys -out CERT.pem`|
+|Extract key from pkcs12|`openssl pkcs12 -in CERT.pfx -nodes -out CERT.key`|
