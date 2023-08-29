@@ -3,7 +3,7 @@
 Setup
 - Single-node Kubernetes cluster on RHEL with CRI-O container runtime and Flannel CNI
 - [NGINX ingress controller](https://github.com/kubernetes/ingress-nginx/) for exposing services
-- [cert-manager](https://cert-manager.io/) for automatic certificate issuance for services
+- [cert-manager](https://cert-manager.io/) for automatic certificate issuance to services
 - [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) for UI management to the cluster
 
 ### 0.1. Software Versions
