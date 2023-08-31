@@ -172,7 +172,6 @@ openssl x509 -req -sha256 -days 365 -CA vxLabCA.pem -CAkey vxLabCA.key -CAcreate
 
 ## 4. Miscellaneous certificate commands
 
-
 |Usage|Command|
 |---|---|
 |Check live server certifcate|`openssl s_client -connect SERVER:PORT </dev/null 2>/dev/null \| openssl x509 -noout -text`|
@@ -185,3 +184,29 @@ openssl x509 -req -sha256 -days 365 -CA vxLabCA.pem -CAkey vxLabCA.key -CAcreate
 |Extract cert from pkcs12|`openssl pkcs12 -in CERT.pfx -nokeys -out CERT.pem`|
 |Extract key from pkcs12|`openssl pkcs12 -in CERT.pfx -nodes -out CERT.key`|
 |Extract public key from private key|`openssl pkey -in CERT.key -pubout`|
+
+Convert from PKCS#1 to PKCS#8:
+
+```console
+$ cat pkcs1.pem
+-----BEGIN RSA PRIVATE KEY-----
+⋮
+-----END RSA PRIVATE KEY-----
+$ openssl pkey -in pkcs1.pem
+-----BEGIN PRIVATE KEY-----
+⋮
+-----END PRIVATE KEY-----
+```
+
+Convert from PKCS#8 to PKCS#1:
+
+```console
+$ cat pkcs8.pem
+-----BEGIN PRIVATE KEY-----
+⋮
+-----END PRIVATE KEY-----
+$ openssl pkey -in pkcs8.pem -traditional
+-----BEGIN RSA PRIVATE KEY-----
+⋮
+-----END RSA PRIVATE KEY-----
+```
