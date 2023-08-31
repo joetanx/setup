@@ -184,3 +184,4 @@ openssl x509 -req -sha256 -days 365 -CA vxLabCA.pem -CAkey vxLabCA.key -CAcreate
 |Combine cert and files into pkcs12|`openssl pkcs12 -export -out CERT.pfx -inkey CERT.key -in CERT.pem -keysig -passout pass:PASSWORD`|
 |Extract cert from pkcs12|`openssl pkcs12 -in CERT.pfx -nokeys -out CERT.pem`|
 |Extract key from pkcs12|`openssl pkcs12 -in CERT.pfx -nodes -out CERT.key`|
+|Extract public key from private key|`openssl pkey -in CERT.key -pubout`|
