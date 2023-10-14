@@ -2,6 +2,7 @@
 
 ```sh
 yum -y install postgresql-server postgresql-contrib
+systemctl enable --now postgresql
 firewall-cmd --add-service postgresql --permanent && firewall-cmd --reload
 ```
 
