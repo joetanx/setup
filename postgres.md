@@ -1,5 +1,9 @@
 ## 1. Install PostgreSQL packages
 
+- Install PostgreSQL server
+- Enable PostgreSQL server to start with system
+- Allow PostgreSQL communiction on firewalld
+
 ```sh
 yum -y install postgresql-server postgresql-contrib
 systemctl enable --now postgresql
