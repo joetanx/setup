@@ -117,3 +117,9 @@ CREATE DATABASE
 [root@foxtrot pgsql]# sudo -u postgres psql -c "GRANT boundary TO boundary;"
 GRANT
 ```
+
+## 5. Clean-up
+
+```sh
+rm -f /var/lib/pgsql/.psql_history /root/.psql_history
+```
