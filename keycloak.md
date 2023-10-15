@@ -99,7 +99,7 @@ Sign out and use `Ctrl` + `C` to shutdown Keycloak after verification
 - Enable Keycloak service to start on boot
 
 ```console
-[root@vault ~]# cat << EOF > /usr/lib/systemd/system/keycloak.service
+[root@keycloak ~]# cat << EOF > /usr/lib/systemd/system/keycloak.service
 [Unit]
 Description=Keycloak Application Server
 After=syslog.target network.target
@@ -114,14 +114,14 @@ StandardOutput=null
 [Install]
 WantedBy=multi-user.target
 EOF
-[root@vault ~]# systemctl enable --now keycloak
+[root@keycloak ~]# systemctl enable --now keycloak
 Created symlink /etc/systemd/system/multi-user.target.wants/keycloak.service → /usr/lib/systemd/system/keycloak.service.
-[root@vault ~]# systemctl status keycloak
+[root@keycloak ~]# systemctl status keycloak
 ● keycloak.service - Keycloak Application Server
      Loaded: loaded (/usr/lib/systemd/system/keycloak.service; enabled; preset: disabled)
      Active: active (running) since Sun 2023-10-15 09:05:27 +08; 6s ago
      ⋮
-Oct 15 09:05:27 vault.vx systemd[1]: Started Keycloak Application Server.
+Oct 15 09:05:27 keycloak.vx systemd[1]: Started Keycloak Application Server.
 ```
 
 Test access and login to Keyloak again
