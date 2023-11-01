@@ -22,8 +22,8 @@ Prepare server certificates
 
 ```sh
 mkdir /opt/keycloak/tls
-curl -sLo /opt/keycloak/tls/server.crt.pem https://github.com/joetanx/lab-certs/raw/main/keycloak/keycloak.vx.pem
-curl -sLo /opt/keycloak/tls/server.key.pem https://github.com/joetanx/lab-certs/raw/main/keycloak/keycloak.vx.key
+curl -sLo /opt/keycloak/tls/server.crt.pem https://github.com/joetanx/lab-certs/raw/main/others/keycloak.vx.pem
+curl -sLo /opt/keycloak/tls/server.key.pem https://github.com/joetanx/lab-certs/raw/main/others/keycloak.vx.key
 ```
 
 Backup initial Keycloak config file
