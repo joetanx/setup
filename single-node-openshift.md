@@ -1,18 +1,18 @@
 ## 1. Setup single-node Openshift with agent-based installer
 
-Openshift can be deployed on various [platforms](https://docs.openshift.com/container-platform/4.12/installing/index.html#supported-platforms-for-openshift-clusters_ocp-installation-overview)
+Openshift can be deployed on various [platforms](https://docs.openshift.com/container-platform/4.14/installing/index.html#supported-platforms-for-openshift-clusters_ocp-installation-overview)
 
-This guide walks through the [agent-based installer](https://docs.openshift.com/container-platform/4.12/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-manually) method, which is suitable for generic VM-based installation
+This guide walks through the [agent-based installer](https://docs.openshift.com/container-platform/4.14/installing/installing_sno/install-sno-installing-sno.html#installing-single-node-openshift-manually) method, which is suitable for generic VM-based installation
 
 ### 1.1. Download the installer and pull secret:
 
 Select `Run Agent-based Installer locally` in the `Create Cluster` page:
 
-![image](https://github.com/joetanx/setup/assets/90442032/17a06356-0d48-4e31-809e-a5eed44c6c2b)
+![image](https://github.com/joetanx/setup/assets/90442032/00f6c8c6-1353-42ed-a4f6-ddb794c4b0dd)
 
-Download the installer and pull secret:
+Download the installer, pull secret and CLI:
 
-![image](https://github.com/joetanx/setup/assets/90442032/1abc902b-4028-4b0f-98bc-b665b62e7f1c)
+![image](https://github.com/joetanx/setup/assets/90442032/af889cb6-ab6e-46ec-8c81-a03c79184d1e)
 
 ### 1.2. Prepare the configuration files
 
@@ -21,7 +21,7 @@ There are 2 configuration files required to generate the agent-based installer:
 1. `install-config.yaml`: Specifies clustering details of the Openshift cluster platform
 2. `agent-config.yaml`: Specifies networking details of the Openshift cluster nodes
 
-Examples of the configuration files can be found in steps 12 and 13 of <https://docs.openshift.com/container-platform/4.12/installing/installing_with_agent_based_installer/installing-with-agent-based-installer.html>
+Examples of the configuration files can be found here: https://docs.openshift.com/container-platform/4.14/installing/installing_with_agent_based_installer/installing-with-agent-based-installer.html#installing-ocp-agent-inputs_installing-with-agent-based-installer
 
 <details><summary>Configuration files used for this lab</summary>
 
@@ -60,10 +60,11 @@ sshKey: 'redacted'
 `agent-config.yaml`
 
 ```yaml
-apiVersion: v1alpha1
+apiVersion: v1beta1
 kind: AgentConfig
 metadata:
   name: sno
+rendezvousIP: 192.168.17.93
 hosts: 
   - hostname: sno
     interfaces:
@@ -103,9 +104,14 @@ A separate machine (not the target VM where the SNO is to be deployed on) is nee
 
 Install nmstatectl: `yum -y install /usr/bin/nmstatectl`
 
-Unpack the installer package:
+Prepare the installer and CLI:
 
 ```console
+[root@foxtrot ~]# tar xvf openshift-client-linux.tar.gz
+README.md
+oc
+kubectl
+[root@foxtrot ~]# mv -t /usr/local/bin/ oc kubectl
 [root@foxtrot ~]# tar xvf openshift-install-linux.tar.gz
 README.md
 openshift-install
@@ -114,41 +120,43 @@ openshift-install
 Check the unpacked files and note that `install-config.yaml` and `agent-config.yaml` are in the same directory as `openshift-install`
 
 ```console
-[root@foxtrot ~]# ls -lh
-total 2.0G
--rw-r--r--. 1 root root  760 May 14 08:01 agent-config.yaml
--rw-r--r--. 1 root root 3.4K May 14 08:01 install-config.yaml
--rwxr-xr-x. 1 root root 473M Apr 19 15:32 openshift-install
--rw-r--r--. 1 root root 335M May 14 07:58 openshift-install-linux.tar.gz
--rw-r--r--. 1 root root  706 Apr 19 15:32 README.md
+[root@foxtrot ~]# tree
+.
+├── agent-config.yaml
+├── install-config.yaml
+├── openshift-install
+└── README.md
+
+0 directories, 4 files
 ```
 
 Generate the Agent Installer ISO:
 
 ```console
 [root@foxtrot ~]# ./openshift-install agent create image
+INFO Configuration has 1 master replicas and 0 worker replicas
 INFO The rendezvous host IP (node0 IP) is 192.168.17.93
 INFO Extracting base ISO from release payload
-WARNING Failed to extract base ISO from release payload - check registry configuration
-INFO Downloading base ISO
+INFO Base ISO obtained from release and cached at [/root/.cache/agent/image_cache/coreos-x86_64.iso]
 INFO Consuming Install Config from target directory
 INFO Consuming Agent Config from target directory
+INFO Generated ISO at agent.x86_64.iso
 ```
 
 Verify that `agent.x86_64.iso` and `auth` files are generated: 
 
 ```console
-[root@foxtrot ~]# ls -lh
-total 2.0G
--rw-r--r--. 1 root root 1.2G May 14 08:00 agent.x86_64.iso
-drwxr-x---. 2 root root   50 May 14 08:00 auth
--rwxr-xr-x. 1 root root 473M Apr 19 15:32 openshift-install
--rw-r--r--. 1 root root 335M May 14 07:58 openshift-install-linux.tar.gz
--rw-r--r--. 1 root root  706 Apr 19 15:32 README.md
-[root@foxtrot ~]# ls -lh auth
-total 16K
--rw-r-----. 1 root root   23 May 14 08:00 kubeadmin-password
--rw-r-----. 1 root root 8.8K May 14 08:00 kubeconfig
+[root@foxtrot ~]# tree
+.
+├── agent.x86_64.iso
+├── auth
+│   ├── kubeadmin-password
+│   └── kubeconfig
+├── openshift-install
+├── README.md
+└── rendezvousIP
+
+1 directory, 6 files
 ```
 
 ### 1.4. Boot the target VM to the agent installer ISO
@@ -162,13 +170,25 @@ Specifications of the SNO VM:
 |/dev/sda|120GB||
 |/dev/sdb|120GB|Persistent storage for image registry|
 
+The `agent.x86_64.iso` boot sequence first performs network check to verify that the network settings is able to reach quay.io
+
+![image](https://github.com/joetanx/setup/assets/90442032/534816d6-e3d2-4c78-9777-88cd96dae5f5)
+
+![image](https://github.com/joetanx/setup/assets/90442032/07ca17b1-49b6-4a41-8f0e-2bd94a0fc116)
+
+Edit the network configuration if needed
+
+![image](https://github.com/joetanx/setup/assets/90442032/9b7ede6b-9c48-40d0-9eda-47f90cdc84ce)
+
+![image](https://github.com/joetanx/setup/assets/90442032/b5c087ee-ddaa-4219-acf9-c1d4c6d63ebb)
+
 The target VM boots into RHCOS and will take a few moments to discover itself:
 
-![image](https://github.com/joetanx/setup/assets/90442032/caefbd04-e38d-40bd-9ec0-5d6c9b2bf4c4)
+![image](https://github.com/joetanx/setup/assets/90442032/b57d7912-df5c-44d3-8105-f73ed1c2f740)
 
 The installation process will start automatically once the discovery is completed:
 
-![image](https://github.com/joetanx/setup/assets/90442032/8d438050-d7df-4bbe-9fd5-198e40c5a01e)
+![image](https://github.com/joetanx/setup/assets/90442032/03d89869-0892-40fa-9c86-8c3473cf63d8)
 
 ### 1.5. Installation completed
 
@@ -178,7 +198,7 @@ It will look nothing is happening after the second reboot, but it is still runni
 
 After about an hour, the cluster registration on https://console.redhat.com/ should complete and show its status:
 
-![image](https://github.com/joetanx/setup/assets/90442032/7538fba9-dcc0-4152-a5b8-9c0721c9aaaf)
+![image](https://github.com/joetanx/setup/assets/90442032/bb3f1274-e7d0-4530-85e9-0923bfaba51b)
 
 ### 1.6. Accessing the SNO
 
@@ -188,9 +208,9 @@ The cluster management page can be accessed at https://console-openshift-console
 
 Login to the cluster management page using `kubeadmin` user and the password from `auth/kubeadmin-password` file that was generated during the agent installer ISO creation
 
-![image](https://github.com/joetanx/setup/assets/90442032/f9b038d8-3c1f-4e8d-a1ff-e629ea1e6b16)
+![image](https://github.com/joetanx/setup/assets/90442032/5ec29b96-c946-4b54-b8f9-a8ed92e74893)
 
-> **Note**
+> [!Note]
 >
 > DNS conditional forwarder needs to be configured in the environment DNS server to forward requests for `*.cluster-domain` to the SNO
 
@@ -199,15 +219,15 @@ Login to the cluster management page using `kubeadmin` user and the password fro
 The only user in RHCOS is `core` and the `sshKey` specified in `install-config.yaml` added to the `.ssh/authorized_keys` of this user
 
 ```console
-[root@foxtrot ~]# ssh -i id_ecdsa core@sno.vx
+[root@foxtrot ~]# ssh -i id_eddsa core@sno.vx
 Warning: Permanently added 'sno.vx' (ED25519) to the list of known hosts.
-Red Hat Enterprise Linux CoreOS 412.86.202304260244-0
-  Part of OpenShift 4.12, RHCOS is a Kubernetes native operating system
+Red Hat Enterprise Linux CoreOS 414.92.202312011602-0
+  Part of OpenShift 4.14, RHCOS is a Kubernetes native operating system
   managed by the Machine Config Operator (`clusteroperator/machine-config`).
 
 WARNING: Direct SSH access to machines is not recommended; instead,
 make configuration changes via `machineconfig` objects:
-  https://docs.openshift.com/container-platform/4.12/architecture/architecture-rhcos.html
+  https://docs.openshift.com/container-platform/4.14/architecture/architecture-rhcos.html
 
 ---
 [core@sno ~]$ id
@@ -223,27 +243,27 @@ oc client can also be used from another other platform: https://docs.openshift.c
 ```console
 [core@sno ~]$ mkdir .kube
 [core@sno ~]$ cat << EOF > .kube/config
-> clusters:
-> - cluster:
->     certificate-authority-data: <redacted>
->     server: https://api.sno.vx:6443
->   name: sno
-> contexts:
-> - context:
->     cluster: sno
->     user: admin
->   name: admin
-> current-context: admin
-> preferences: {}
-> users:
-> - name: admin
->   user:
->     client-certificate-data: <redacted>
->     client-key-data: <redacted>
-> EOF
+clusters:
+- cluster:
+    certificate-authority-data: <redacted>
+    server: https://api.sno.vx:6443
+  name: sno
+contexts:
+- context:
+    cluster: sno
+    user: admin
+  name: admin
+current-context: admin
+preferences: {}
+users:
+- name: admin
+  user:
+    client-certificate-data: <redacted>
+    client-key-data: <redacted>
+EOF
 [core@sno ~]$ oc get nodes
 NAME   STATUS   ROLES                         AGE   VERSION
-sno    Ready    control-plane,master,worker   11h   v1.25.8+37a9a08
+sno    Ready    control-plane,master,worker   8h    v1.27.8+4fab27b
 ```
 
 ## 2. Configure image registry
@@ -256,7 +276,7 @@ To complete the cluster setup, the image registry needs to be functional
 
 A 120GB disk was provisioned to the VM and available at `/dev/sdb` of the VM; the most straightforward method to use this disk is to configure it as local volume
 
-Ref: https://docs.openshift.com/container-platform/4.12/storage/persistent_storage/persistent_storage_local/persistent-storage-local.html#local-create-cr-manual_persistent-storage-local
+Ref: https://docs.openshift.com/container-platform/4.14/storage/persistent_storage/persistent_storage_local/persistent-storage-local.html#local-create-cr-manual_persistent-storage-local
 
 Example persistent volume configuration:
 
@@ -308,44 +328,44 @@ Applying pv and pvc together, and verify creation:
 
 ```console
 [core@sno ~]$ cat << EOF | oc apply -f -
-> apiVersion: v1
-> kind: PersistentVolume
-> metadata:
->   name: pv-image-registry
-> spec:
->   capacity:
->     storage: 100Gi
->   accessModes:
->     - ReadWriteOnce
->   persistentVolumeReclaimPolicy: Delete
->   volumeName: pv-image-registry
->   storageClassName: local-storage
->   local:
->     path: /dev/sdb
->   nodeAffinity:
->     required:
->       nodeSelectorTerms:
->       - matchExpressions:
->         - key: kubernetes.io/hostname
->           operator: In
->           values:
->           - sno
-> ---
-> kind: PersistentVolumeClaim
-> apiVersion: v1
-> metadata:
->   name: pvc-image-registry
->   namespace: openshift-image-registry
-> spec:
->   accessModes:
->   - ReadWriteOnce
->   volumeMode: Filesystem
->   resources:
->     requests:
->       storage: 100Gi
->   storageClassName: local-storage
->   volumeName: pv-image-registry
-> EOF
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-image-registry
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  volumeName: pv-image-registry
+  storageClassName: local-storage
+  local:
+    path: /dev/sdb
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - sno
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-image-registry
+  namespace: openshift-image-registry
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: local-storage
+  volumeName: pv-image-registry
+EOF
 persistentvolume/pv-image-registry created
 persistentvolumeclaim/pvc-image-registry created
 [core@sno ~]$ oc get pv
@@ -364,7 +384,7 @@ If persistent storage configuration from [2.1.](#21-configure-persistent-storage
 
 `emptyDir{}` is a memory-backed non-persistent storage, using this is a quick way to get image registry running, but all images are lost if the registry restarts
 
-Ref: https://docs.openshift.com/container-platform/4.12/registry/configuring_registry_storage/configuring-registry-storage-baremetal.html#installation-registry-storage-non-production_configuring-registry-storage-baremetal
+Ref: https://docs.openshift.com/container-platform/4.14/registry/configuring_registry_storage/configuring-registry-storage-baremetal.html#installation-registry-storage-non-production_configuring-registry-storage-baremetal
 
 ```
 oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}},"managementState":"Managed"}}'
@@ -382,45 +402,45 @@ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patc
 
 ```console
 [core@sno ~]$ oc -n openshift-image-registry get pods
-NAME                                              READY   STATUS    RESTARTS   AGE
-cluster-image-registry-operator-b9dd5984c-fdhfq   1/1     Running   1          11h
-image-registry-58b4b57fc6-b46m4                   1/1     Running   0          25s
-node-ca-642vg                                     1/1     Running   1          11h
+NAME                                               READY   STATUS    RESTARTS   AGE
+cluster-image-registry-operator-758d7d5dfb-qrtqj   1/1     Running   1          8h
+image-registry-55b9df444-cc7td                     1/1     Running   0          61s
+node-ca-xrmbn                                      1/1     Running   1          8h
 ```
 
 ## 3. Test app deployment
 
 Let's deploy a sample web server application to verify that the cluster and image registry are functional
 
-The sample web server application will be deployed via templates which uses the [Source-to-image](https://docs.openshift.com/container-platform/4.12/openshift_images/using_images/using-s21-images.html) (S2I) to build the image, and deploy the image into pods
+The sample web server application will be deployed via templates which uses the [Source-to-image](https://docs.openshift.com/container-platform/4.14/openshift_images/using_images/using-s21-images.html) (S2I) to build the image, and deploy the image into pods
 
 Go to `Developer` view:
 
-![image](https://github.com/joetanx/setup/assets/90442032/951ed605-47d3-43e4-8b11-0ff591cfdd69)
+![image](https://github.com/joetanx/setup/assets/90442032/2a6194d0-ada5-417e-aab6-34df6f09f9b1)
 
 Select `Create Project` in the project drop down menu:
 
-![image](https://github.com/joetanx/setup/assets/90442032/0816b79e-23ec-45f4-a479-5d6301f4c265)
+![image](https://github.com/joetanx/setup/assets/90442032/9ceb675f-a8f1-4380-bbb2-047cda4d04f8)
 
 Give the project a name (e.g. `httpd`):
 
-![image](https://github.com/joetanx/setup/assets/90442032/85bb417e-5bac-4bd0-93e8-65aa117bb52d)
+![image](https://github.com/joetanx/setup/assets/90442032/adedc57e-8084-4dbb-8443-ca4f1ea43afa)
 
 Select `+Add` and browse `All services` under `Developer Catalog`:
 
-![image](https://github.com/joetanx/setup/assets/90442032/5a964773-0580-4677-a698-0705314b2520)
+![image](https://github.com/joetanx/setup/assets/90442032/4d4cbf0d-9b73-40c8-afcf-54a6e8ea654d)
 
 Select `Apache HTTP Server` template:
 
-![image](https://github.com/joetanx/setup/assets/90442032/b2ade3bd-59cc-4422-b823-44759c3c3f98)
+![image](https://github.com/joetanx/setup/assets/90442032/7fb15ad7-1f09-4f6a-8c70-88a320686fff)
 
 Select `Instantiate Template`:
 
-![image](https://github.com/joetanx/setup/assets/90442032/56075622-cf5e-4af4-a508-27a44ec8e807)
+![image](https://github.com/joetanx/setup/assets/90442032/351f8e28-c34d-4ee0-9746-17127586062b)
 
 Accept defaults and click `Create`:
 
-![image](https://github.com/joetanx/setup/assets/90442032/4868a34e-1b04-426c-ab54-6f51f5f997cf)
+![image](https://github.com/joetanx/setup/assets/90442032/b73a8e1c-b660-4486-a292-feb079a08780)
 
 The build will start with `pending` status:
 
@@ -428,7 +448,7 @@ The build will start with `pending` status:
 
 The build will change to `running` after pending for a short while:
 
-> **Note**
+> [!Note]
 > 
 > If the build is stuck at `pending`, select `View logs` to investigate; there can be few reasons for the build to be stuck (e.g. non-functional image registry)
 
@@ -448,7 +468,7 @@ The application is ready when the pod status change to `Running`
 
 Click on the `Location` URL to open the sample web page:
 
-![image](https://github.com/joetanx/setup/assets/90442032/375736e2-b24b-4a3b-a594-468b1fb31d51)
+![image](https://github.com/joetanx/setup/assets/90442032/8c0a0953-3ecc-49ac-8fc6-64257d47107d)
 
 ## Appendix A. Troubleshooting kubelet certificate
 
