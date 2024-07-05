@@ -333,11 +333,11 @@ Kibana encryption keys are required for persistent saved objects, running Kibana
 
 Under Security > Alerts:
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/2f5a8fc3-2aca-4c06-82a3-6d1d56793cb7)
+![image](https://github.com/joetanx/setup/assets/90442032/bc3d65d3-00f4-4fa0-9ec9-b53f5862fcb9)
 
 Under Management > Stack Management > Alerts and Insights > Cases:
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/ee115f69-fa75-4b75-8305-16c6abf7008d)
+![image](https://github.com/joetanx/setup/assets/90442032/d00f1fff-d688-4c01-a137-118a7bd5a60a)
 
 Generate Kibana encyption keys: `/usr/share/kibana/bin/kibana-encryption-keys generate`
 
@@ -378,7 +378,7 @@ Go to `Management` → `Fleet`, select `Edit` on the `default` entry under `Outp
 
 To get certificate fingerprint: `openssl x509 -fingerprint -sha256 -in /path/to/elasticsearch-ca.crt | grep sha256 | sed 's/://g'`
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/a5603354-37f0-4760-9c1b-9d38971ac157)
+![image](https://github.com/joetanx/setup/assets/90442032/0153e768-389b-4626-8f4b-d8af7fcdbddf)
 
 ### 3.2. Setup Fleet Server
 
@@ -386,11 +386,11 @@ Go to `Management` → `Fleet`, select `Add Fleet Server` under `Fleet server ho
 
 Enter Fleet Server details and select `Generate Fleet Server policy`
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/6582e0ad-97f1-41a4-bbcc-54b81087b18f)
+![image](https://github.com/joetanx/setup/assets/90442032/919ac94b-8c0f-49f0-8187-e3c038577106)
 
 The wizard provides Fleet Server installation commands after the policy is created:
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/09224511-7f04-4154-8fd7-e2e78947b876)
+![image](https://github.com/joetanx/setup/assets/90442032/2dda3e06-6a2c-4b1a-94a2-25bd8493b042)
 
 To use self-generated certificates, modify the `elastic-agent install` command as stated [here](https://www.elastic.co/guide/en/fleet/current/secure-connections.html#_encrypt_traffic_between_elastic_agents_fleet_server_and_elasticsearch):
 
@@ -444,7 +444,7 @@ Successfully enrolled the Elastic Agent.
 Elastic Agent has been successfully installed.
 ```
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/fd2d6c5a-de7f-4a51-8d8b-ee94bdb97b3c)
+![image](https://github.com/joetanx/setup/assets/90442032/ca69f756-86d8-49a8-8303-54ba785ffc0d)
 
 Allow Fleet Server communication on firewall:
 
@@ -456,13 +456,13 @@ firewall-cmd --add-port 8220/tcp --permanent && firewall-cmd --reload
 
 Select `Continue enrolling Elastic Agent` from the previous wizard and create an Agent policy:
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/c44dbf8e-452e-4793-929e-70bb3227391a)
+![image](https://github.com/joetanx/setup/assets/90442032/897c2c2c-708a-4d57-9fc2-92a2b33cc45f)
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/436da767-3e1e-423e-98a9-a85534ded4c6)
+![image](https://github.com/joetanx/setup/assets/90442032/f8b36b56-95ab-4001-8408-2a165d400174)
 
 The wizard provides Elastic Agent installation commands after the policy is created:
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/92012cac-b2f1-4ab0-947d-f49b0da29b34)
+![image](https://github.com/joetanx/setup/assets/90442032/23a52ec9-25cb-4229-b224-53b042526f1e)
 
 To use self-generated certificates, modify the `elastic-agent install` command as stated [here](https://www.elastic.co/guide/en/fleet/current/secure-connections.html#_encrypt_traffic_between_elastic_agents_fleet_server_and_elasticsearch):
 
@@ -491,11 +491,11 @@ Successfully enrolled the Elastic Agent.
 Elastic Agent has been successfully installed.
 ```
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/95814aa9-4751-49c8-9a4c-a2d45151d680)
+![image](https://github.com/joetanx/setup/assets/90442032/d7b59068-0eef-46a4-adf8-e4be154071ce)
 
 ### 3.4. Example Fleet Server + Elastic Agent output
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/989d81aa-2052-43f5-998a-0e2b8e0a7190)
+![image](https://github.com/joetanx/setup/assets/90442032/a85b793d-802f-421a-b664-d494fd224b08)
 
 ## 4. Integrate Suricata to Elastic
 
@@ -541,13 +541,13 @@ Simply search for Suricata returns `Alerts` and `Events` views in both `Dashboar
 
 Ref: https://docs.elastic.co/en/integrations/cyberarkpas
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/68c1d0d5-80f9-4c66-b946-513cf4d83218)
+![image](https://github.com/joetanx/setup/assets/90442032/b9649772-6e2e-49a9-a1c8-ac11e2fcb647)
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/7e3b1992-e6f2-43e4-945c-4e8259cdbb1e)
+![image](https://github.com/joetanx/setup/assets/90442032/d30bfef8-7ed0-41d5-9500-82a316288a15)
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/3d1f17ed-98a7-404a-a2c7-a282aa5098f1)
+![image](https://github.com/joetanx/setup/assets/90442032/065703a6-8f14-4c63-be36-ab774c5b237f)
 
-![image](https://github.com/joetanx/soc-lab/assets/90442032/7dec2bc6-1a79-4ae7-9f06-72d014d3c97b)
+![image](https://github.com/joetanx/setup/assets/90442032/187d3113-e6e5-436a-a3d0-2ee607f15dd0)
 
 This integration sets up a tcp/udp listener on the Elastic Agent, allow communication to the configured ports on firewall to allow the logs from PAM to flow in
 
