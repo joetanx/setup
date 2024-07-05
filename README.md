@@ -7,3 +7,4 @@
 |Setup single-node Openshift|https://github.com/joetanx/setup/blob/main/single-node-openshift.md|
 |Setup GitLab community edition|https://github.com/joetanx/setup/blob/main/gitlab.md|
 |Setup Keycloak|https://github.com/joetanx/setup/blob/main/keycloak.md|
+|Setup SOC lab with examples on Suricata and CyberArk Integration|https://github.com/joetanx/setup/blob/main/soc-lab.md|
