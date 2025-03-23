@@ -449,7 +449,7 @@ Log location: Applications and Services → Microsoft → Windows → Eventlog-F
 
 ![image](https://github.com/user-attachments/assets/d6b68c84-c459-493a-9c4b-5bf26a90c6d8)
 
-The first event received would likely be a `The file name is too long. ` event - this is normal, the events would take a few minutes to start coming in
+The first event received would likely be a `The file name is too long.` event - this is normal, the events would take a few minutes to start coming in
 
 ![image](https://github.com/user-attachments/assets/9022af52-ff6e-49f2-ba6a-99695b8fbc4f)
 
