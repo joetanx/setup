@@ -1,4 +1,4 @@
-Forwarding Windows event forwarding between machines in separate domains or WORKGROUP environments.
+Setup Windows event forwarding between machines in separate domains or WORKGROUP environments.
 
 Work-in-progress.
 
