@@ -72,11 +72,144 @@ The forwarder certificate is simpler with just using the `-DnsName` to put the f
 
 ## 2. Configure WinRM on the collector
 
-### 2.X. OPTIONAL - Testing WinRM connnection to the collector
+### 2.1. Enable certificate authentication method for WinRM
 
-#### 2.X.1. Configure certificate mapping
+#### Configure
 
-#### 2.X.2. Test connection
+Powershell:
+
+```pwsh
+Set-Item -Path WSMan:\localhost\Service\Auth\Certificate -Value $true
+```
+
+Or command prompt:
+
+```cmd
+winrm s winrm/config/service/auth '@{Certificate="true"}'
+```
+
+#### Verify
+
+Powershell:
+
+```pwsh
+Get-WSManInstance -ResourceURI winrm/config/service/auth
+```
+
+Or powershell (another way):
+
+```pwsh
+Get-ChildItem -Path WSMan:\localhost\Service\Auth
+```
+
+Or command prompt:
+
+```cmd
+winrm g winrm/config/service/auth
+```
+
+### 2.3. Configure firewall rule for WinRM over HTTPS
+
+Powershell:
+
+```pwsh
+New-NetFirewallRule -DisplayName 'Windows Remote Management (HTTPS-In)' -Direction Inbound -Program System -Protocol TCP -LocalPort 5986 -Action Allow -Group 'Windows Remote Management'
+```
+
+Or command prompt:
+
+```cmd
+netsh advfirewall firewall add rule name="Windows Remote Management (HTTPS-In)" dir=in program=System protocol=tcp localport=5986 action=allow
+```
+
+### 2.4. Configure HTTPS listner
+
+#### Configure
+
+```pwsh
+$cert = (Get-ChildItem cert:\LocalMachine\My | where {$_.subject -eq 'O=vx Lab, CN=Windows Event Collector'})
+New-Item -Path WSMan:\LocalHost\Listener -Transport HTTPS -Address * -CertificateThumbPrint $cert.Thumbprint -Force
+```
+
+#### Verify or troubleshooting commands
+
+Enumerate all listeners:
+
+```pwsh
+Get-WSManInstance -ResourceURI winrm/config/listener -Enumerate
+```
+
+Get HTTPS listener details:
+
+```pwsh
+Get-WSManInstance -ResourceURI winrm/config/listener -SelectorSet @{Address='*';Transport='HTTPS'}
+```
+
+Remove HTTPS listener:
+
+```pwsh
+Remove-WSManInstance winrm/config/Listener -SelectorSet @{Address='*';Transport='HTTPS'}
+```
+
+### 2.5. OPTIONAL - Testing WinRM connnection to the collector
+
+#### 2.5.1. Create test user
+
+Domain user:
+
+```cmd
+dsadd user "cn=Windows Event Collector,ou=Services,dc=lab,dc=vx" -samid wecsvc -upn wecsvc@lab.vx -email wecsvc@lab.vx -display "Windows Event Collector" -disabled no -pwd Micro123 -pwdneverexpires yes
+dsmod group "CN=Remote Management Users,CN=Builtin,DC=lab,DC=vx" -addmbr "CN=Windows Event Collector,ou=Services,dc=lab,dc=vx"
+```
+
+Local user:
+
+```cmd
+net user wecsvc Micro123 /add
+net "Remote Management Users" wecsvc /add
+```
+
+#### 2.5.2. Configure certificate mapping
+
+##### Configure
+
+```pwsh
+$issuer = (Get-ChildItem cert:\LocalMachine\CA | where {$_.subject -eq 'CN=Lab Issuer'})
+New-Item -Path WSMan:\localhost\ClientCertificate  -Subject * -URI * -Issuer $issuer.Thumbprint -Credential (Get-Credential) -Force
+```
+
+##### Verify
+
+```pwsh
+Get-ChildItem WSMan:\localhost\ClientCertificate
+```
+
+#### 2.5.3. Test connection
+
+```pwsh
+$cert = (Get-ChildItem cert:\LocalMachine\My | where {$_.subject -eq 'O=vx Lab, CN=Windows Event Client'})
+```
+
+#### Connect WinRM with basic authentication
+
+- For troubleshooting if the WinRM service is working/accessible
+- Basic authentication should be enabled with `Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true` for this to work
+
+```pwsh
+Enter-PSSession -ComputerName 192.168.17.20 -UseSSL -Credential (Get-Credential)
+```
+
+#### Connect WinRM with certificate authentication
+
+```pwsh
+Enter-PSSession -ComputerName 192.168.17.20 -UseSSL -CertificateThumbprint $cert.Thumbprint
+```
+
+#### Invoke-command with certificate authentication
+
+```pwsh
+Invoke-Command -ComputerName 192.168.17.20 -UseSSL -CertificateThumbprint $cert.Thumbprint -ScriptBlock {1}
+```
 
 ## 3. Configure events subscriber on the collector
 
