@@ -1,8 +1,74 @@
-Setup Windows event forwarding between machines in separate domains or WORKGROUP environments.
+## 0. Overview
 
-Work-in-progress.
+Windows event forwarding uses WinRM protocol, which supports:
+- Kerberos authentication in same-domain environments
+- Certificate authentication in separate domains or WORKGROUP environments
 
 ## 1. Setup collector and forwarder certificates
+
+Requirements:
+
+|Machine|Requirement|
+|---|---|
+|Collector|This is the service certificate used for the WinRM HTTPS listener.<br>The FQDN or IP that the forwarders would be using to connect to the collector should be in the subject CN or included in the SANs of the certificate.|
+|Forwarder|This the client certificate used by `NETWORK SERVICE` to authenticate the machine connecting to the collector.<br>The forwarder's machine name should be in the subject CN or included in the SANs of the certificate.|
+
+This example uses the self-signed certificate chain from [lab-certs](https://github.com/joetanx/lab-certs) repository
+
+|Certificate|Thumbprint|
+|---|---|
+|Lab Root|`E9AEA1BA21DA8352AA3999AE94891466CD761958`|
+|Lab Issuer|`476F0ABF52FD56722B9C9A833144D9ABB7F55CE9`|
+
+> [!Note]
+>
+> The intermediate CA `Lab Issuer` is used to generate the certificates
+>
+> The certificate thumbprint of the intermediate CA, **not root CA**, would be use in both collector and forwarder configurations
+
+> [!Tip]
+>
+> It is also possible to use the `New-SelfSignedCertificate` to generate direct self-signed certificates without any chain hierarchy
+>
+> In this case, the certificates between collector and forwarder would need to be cross-trusted (i.e. imported in the the Root store), and the certificate thumbprints would need to be cross-configure in the respective configurations
+
+### 1.1. Download and importthe Lab Issuer package
+
+Perform this on both the collector and forwarder machines
+
+```pwsh
+Invoke-WebRequest https://github.com/joetanx/lab-certs/raw/refs/heads/main/ca/lab_issuer.pfx -OutFile lab_issuer.pfx
+certutil -csp "Microsoft Software Key Storage Provider" -p lab -importPFX lab_issuer.pfx
+```
+
+### 1.2. Generate the certificates
+
+Below commands:
+- uses the imported Lab Issuer to sign the certificates (`-Signer cert:\LocalMachine\My\476F0ABF52FD56722B9C9A833144D9ABB7F55CE9`)
+- creates certificates with 25 years validity from 2025 to 2050 (yes, it's overkill)
+
+#### Collector
+
+```pwsh
+New-SelfSignedCertificate -KeyAlgorithm nistP384 -Subject 'O=vx Lab, CN=Windows Event Collector' `
+-TextExtension @("2.5.29.17={text}DNS=dc&DNS=dc.lab.vx&IPAddress=192.168.17.20") -CertStoreLocation cert:\LocalMachine\My `
+-Signer cert:\LocalMachine\My\476F0ABF52FD56722B9C9A833144D9ABB7F55CE9 `
+-NotBefore ([datetime]::parseexact('01-Jan-2025','dd-MMM-yyyy',$null)) -NotAfter ([datetime]::parseexact('01-Jan-2050','dd-MMM-yyyy',$null))
+```
+
+- The `-TextExtension` option is used with OID `2.5.29.17` to specifiy entries for the collector's machine name, FQDN and IP address in the SAN
+- It is helpful to include all names and IP addresses that forwarders would use to connect to the collector to minimize SSL certificate errors
+
+#### Forwarder
+
+```pwsh
+New-SelfSignedCertificate -KeyAlgorithm nistP384 -Subject 'O=vx Lab, CN=Windows Event Client' `
+-DnsName $(hostname) -CertStoreLocation cert:\LocalMachine\My `
+-Signer cert:\LocalMachine\My\476F0ABF52FD56722B9C9A833144D9ABB7F55CE9 `
+-NotBefore ([datetime]::parseexact('01-Jan-2020','dd-MMM-yyyy',$null)) -NotAfter ([datetime]::parseexact('01-Jan-2050','dd-MMM-yyyy',$null))
+```
+
+The forwarder certificate is simpler with just using the `-DnsName` to put the forwarder's machine name in the SAN, this option can only be used to specify a single DNS SAN entry
 
 ## 2. Configure WinRM on the collector
 
