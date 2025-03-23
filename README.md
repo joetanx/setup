@@ -1,5 +1,6 @@
 |Topic|Link|
 |---|---|
+|Setup Windows event forwarding between machines in separate domains or WORKGROUP environments|https://github.com/joetanx/setup/blob/main/win-event-forwarding.md|
 |Setup nginx for TLS offloading<br>(both server install and container methods)|https://github.com/joetanx/setup/blob/main/nginx.md|
 |Setup standalone Conjur Enterprise leader on Podman on RHEL 9.1 with base policies for MySQL and AWS credentials|https://github.com/joetanx/setup/blob/main/conjur.md|
 |Setup MySQL server with sample world database|https://github.com/joetanx/setup/blob/main/mysql.md|
