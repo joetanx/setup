@@ -128,7 +128,7 @@ System.String   CbtHardeningLevel                              Relaxed
 
 </details>
 
-### 2.3. Configure firewall rule for WinRM over HTTPS
+### 2.2. Configure firewall rule for WinRM over HTTPS
 
 Powershell:
 
@@ -142,7 +142,7 @@ Or command prompt:
 netsh advfirewall firewall add rule name="Windows Remote Management (HTTPS-In)" dir=in program=System protocol=tcp localport=5986 action=allow
 ```
 
-### 2.4. Configure HTTPS listner
+### 2.3. Configure HTTPS listner
 
 #### Configure
 
@@ -215,9 +215,9 @@ ListeningOn           : {127.0.0.1, 192.168.17.20, ::1}
 
 </details>
 
-### 2.5. OPTIONAL - Testing WinRM connnection to the collector
+### 2.4. OPTIONAL - Testing WinRM connnection to the collector
 
-#### 2.5.1. Create test user
+#### 2.4.1. Create test user
 
 Domain user:
 
@@ -233,7 +233,7 @@ net user wecsvc Micro123 /add
 net localgroup "Remote Management Users" wecsvc /add
 ```
 
-#### 2.5.2. Configure certificate mapping
+#### 2.4.2. Configure certificate mapping
 
 ##### Configure
 
@@ -270,7 +270,7 @@ Container       {URI=*, Issuer=476F0ABF52FD56722... ClientCertificate_524521784
 
 </details>
 
-#### 2.5.3. Test connection
+#### 2.4.3. Test connection
 
 ```pwsh
 $cert = (Get-ChildItem cert:\LocalMachine\My | where {$_.subject -eq 'O=vx Lab, CN=Windows Event Client'})
@@ -310,7 +310,7 @@ DC
 
 </details>
 
-#### 2.5.4. Clean-up test user
+#### 2.4.4. Clean-up test user
 
 Domain user:
 
