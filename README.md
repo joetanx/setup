@@ -1,6 +1,8 @@
 |Topic|Link|
 |---|---|
+|Setup Cribl to ingest Windows events and Linux syslog|https://github.com/joetanx/setup/blob/main/cribl.md|
 |Setup Windows event forwarding between machines in separate domains or WORKGROUP environments|https://github.com/joetanx/setup/blob/main/win-event-forwarding.md|
+|Setup Elastic SOC lab + Suricata and CyberArk Integration|https://github.com/joetanx/setup/blob/main/soc-lab.md|
 |Setup nginx for TLS offloading<br>(both server install and container methods)|https://github.com/joetanx/setup/blob/main/nginx.md|
 |Setup standalone Conjur Enterprise leader on Podman on RHEL 9.1 with base policies for MySQL and AWS credentials|https://github.com/joetanx/setup/blob/main/conjur.md|
 |Setup MySQL server with sample world database|https://github.com/joetanx/setup/blob/main/mysql.md|
@@ -9,4 +11,3 @@
 |Setup single-node Openshift|https://github.com/joetanx/setup/blob/main/single-node-openshift.md|
 |Setup GitLab community edition|https://github.com/joetanx/setup/blob/main/gitlab.md|
 |Setup Keycloak|https://github.com/joetanx/setup/blob/main/keycloak.md|
-|Setup Elastic SOC lab + Suricata and CyberArk Integration|https://github.com/joetanx/setup/blob/main/soc-lab.md|
