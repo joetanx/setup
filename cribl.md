@@ -166,6 +166,12 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 > - Client certificate method is useful for heterogeneous environments where clients are in WORKGROUP, different forests, or mixture of both
 > - Essentially, Kerberos authentication uses Active Directory as trust while client certificate authentication uses the CA certificate chain as trust to validate clients
 
+> [!Tip]
+>
+> There is another guide on native Windows event forwarding [here](https://github.com/joetanx/setup/blob/main/win-event-forwarding.md)
+>
+> Test out both the native and Cribl way to learn more and compare
+
 #### 2.2.1. Cribl configuration
 
 ##### Create WEF data source and configure certificate
@@ -176,13 +182,11 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 >
 > Use your own certificate chain corresponding to your Cribl hostname
 >
-> The CA certificate chain configure would be used to validate client certificates
+> The CA certificate chain configured would be used to validate client certificates
 
 ![image](https://github.com/user-attachments/assets/bfe32db3-19fc-454e-bce3-b519da5703b7)
 
 ##### Configure subscription and the logs to collect
-
-This configuration is similar to configuring subscription on Event Viewer [here](https://github.com/joetanx/setup/blob/main/win-event-forwarding.md#4-configure-events-subscriber-on-the-collector)
 
 ![image](https://github.com/user-attachments/assets/73d4c449-92af-41b7-9e71-fac172c57b83)
 
@@ -204,10 +208,81 @@ This configuration is similar to configuring subscription on Event Viewer [here]
 >
 > This example uses test certificate from [lab-certs](https://github.com/joetanx/lab-certs)
 >
-> The configuration is similar to the steps [here](https://github.com/joetanx/setup/blob/main/win-event-forwarding.md#1-setup-collector-and-forwarder-certificates)
+> Use your own certificate chain to establish trust between Cribl and client
 
+Download and importthe Lab Issuer package
 
+```pwsh
+Invoke-WebRequest https://github.com/joetanx/lab-certs/raw/refs/heads/main/ca/lab_issuer.pfx -OutFile lab_issuer.pfx
+certutil -csp "Microsoft Software Key Storage Provider" -p lab -importPFX lab_issuer.pfx
+```
+
+Generate the certificates
+
+```pwsh
+New-SelfSignedCertificate -KeyAlgorithm nistP384 -Subject 'O=vx Lab, CN=Windows Event Client' `
+-DnsName $(hostname) -CertStoreLocation cert:\LocalMachine\My `
+-Signer cert:\LocalMachine\My\476F0ABF52FD56722B9C9A833144D9ABB7F55CE9 `
+-NotBefore ([datetime]::parseexact('01-Jan-2020','dd-MMM-yyyy',$null)) -NotAfter ([datetime]::parseexact('01-Jan-2050','dd-MMM-yyyy',$null))
+```
+
+The `New-SelfSignedCertificate` command above:
+- uses `-DnsName` to put the forwarder's machine name in the SAN, this option can only be used to specify a single DNS SAN entry
+- uses the imported Lab Issuer to sign the certificates (`-Signer cert:\LocalMachine\My\476F0ABF52FD56722B9C9A833144D9ABB7F55CE9`)
+- creates certificates with 25 years validity from 2025 to 2050 (yes, it's overkill)
+
+##### Grant permissions to `NETWORK SERVICE` on event log
+
+```cmd
+net localgroup "Event Log Readers" "NETWORK SERVICE" /add
+```
+
+> [!Note]
+>
+> In some cases, `NETWORK SERVICE` may need to be added to `Manage auditing and security log` user rights assignment
+>
+> Location: Group Policy Editer → Computer Configuration → Policies → Windows Settings → Security Settings → Local Policies → User Rights Assignment → Manage auditing and security log
+>
+> ![image](https://github.com/user-attachments/assets/c9b5da09-eaa3-4f6f-92d6-7af514b78535)
+
+##### Grant permission on the client certificate private keys
+
+Open local machine certificate manager (`certlm.msc`), select `Manage Private Keys` on the client certificate:
+
+![image](https://github.com/user-attachments/assets/2d548988-7b0d-4668-881b-35b1d72ab557)
+
+Assign `Read` permissions to `NETWORK SERVICE`:
+
+![image](https://github.com/user-attachments/assets/2486b438-e1d4-4304-8344-9eab513bdfc1)
+
+##### Configure events forwarding 
+
+Group Policy Editer → Computer Configuration → Policies → Windows Settings → Administrative Templates → Windows Components → Event Forwarding → Configure target Subscription Manager
+
+Select `Enabled`
+
+![image](https://github.com/user-attachments/assets/c7bc8586-cd41-4a93-b55a-73edd6a9da7f)
+
+Select `Show` under `SubscriptionManagers` and enter:
+
+```
+Server=https://<cribl-name>:5986/wsman/SubscriptionManager/WEC,Refresh=10,IssuerCA=<issuer-certificate-thumbprint>
+```
+
+![image](https://github.com/user-attachments/assets/fb4b0a76-cc0b-48bb-b717-41bfafda612f)
+
+##### Successful WEF connection to Cribl
+
+Event `100`: `The subscription <sbuscription-name> is created successfully.`
+
+![image](https://github.com/user-attachments/assets/04bb154f-3790-42f0-be91-d08f43466e1f)
+
+> [!tip]
+>
+> For possible troubleshooing, refer to section 6 and 7 of the [Windows event forwarding guide](https://github.com/joetanx/setup/blob/main/win-event-forwarding.md)
 
 #### 2.2.3. Verify events coming in to Cribl
 
+Start a capture in `Live Data` tab of the data source and see if events are coming in
 
+![image](https://github.com/user-attachments/assets/d4c5d7f2-e719-48aa-a93b-b40319d79bd7)
