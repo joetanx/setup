@@ -286,3 +286,7 @@ Event `100`: `The subscription <sbuscription-name> is created successfully.`
 Start a capture in `Live Data` tab of the data source and see if events are coming in
 
 ![image](https://github.com/user-attachments/assets/d4c5d7f2-e719-48aa-a93b-b40319d79bd7)
+
+### 2.3. Monitoring data sources
+
+![image](https://github.com/user-attachments/assets/1268b325-e73e-440b-bb14-91bc8d75ac79)
