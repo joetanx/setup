@@ -435,11 +435,11 @@ Log location: Applications and Services → Microsoft → Windows → Eventlog-F
 
   ![image](https://github.com/user-attachments/assets/92061079-e66c-4854-abae-94324289239b)
 
-- 100: `The subscription default is created successfully.`
+- 100: `The subscription <subscription-name> is created successfully.`
 
   ![image](https://github.com/user-attachments/assets/34a35f93-5009-43f7-bb70-08abf6924ac7)
 
-- 104: `The forwarder has successfully connected to the subscription manager at address https://192.168.17.20:5986/wsman/SubscriptionManager/WEC.`
+- 104: `The forwarder has successfully connected to the subscription manager at address https://<collector-name>:5986/wsman/SubscriptionManager/WEC.`
 
   ![image](https://github.com/user-attachments/assets/dc3de344-0cb9-4023-8708-62a2bcd2b533)
 
