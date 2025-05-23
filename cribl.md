@@ -72,3 +72,15 @@ systemctl start cribl
 ![image](https://github.com/user-attachments/assets/bdc37100-2d92-4909-bdf5-c31b8559dfba)
 
 ![image](https://github.com/user-attachments/assets/bf9915fe-9f62-4366-9ea6-4a0d04d077e3)
+
+## 2. Configure data sources
+
+![image](https://github.com/user-attachments/assets/5b6c8fc2-ae06-407c-b22d-ba2149d87ca0)
+
+### 2.1. Syslog
+
+A default syslog source is already configured for both TCP and UDP on port 9514, it just needs to be enabled.
+
+![image](https://github.com/user-attachments/assets/bd2cdc7f-505f-46d4-b539-d514cd26e80d)
+
+### 2.2. Windows Event Forwarder
