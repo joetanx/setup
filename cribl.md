@@ -404,9 +404,13 @@ Cribl provides the [Azure Resource Graph Explorer](https://docs.cribl.io/stream/
 
 Configuration of Sentinel as data destination in Cribl can be done using `URL` or `ID`
 
-![image](https://github.com/user-attachments/assets/942eb45a-13ad-42a7-b496-2cd53e3a07f6)
+![image](https://github.com/user-attachments/assets/5f072ed8-76c0-41b1-9038-0342a87dfefa)
 
-![image](https://github.com/user-attachments/assets/4a9034f4-014c-4b4f-aa2c-f933e3990533)
+![image](https://github.com/user-attachments/assets/62406f1c-4d51-4804-a1cc-db4e80581036)
+
+![image](https://github.com/user-attachments/assets/9a97851c-65e5-492a-9cc5-c246bd6b2afe)
+
+![image](https://github.com/user-attachments/assets/db1e49c6-cc0a-44f9-93cb-2767eddc6b1e)
 
 #### 3.4.2. Authentication
 
