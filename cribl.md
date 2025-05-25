@@ -290,3 +290,47 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 ### 2.3. Monitoring data sources
 
 ![image](https://github.com/user-attachments/assets/1268b325-e73e-440b-bb14-91bc8d75ac79)
+
+## 3. Microsoft Sentinel Integration
+
+https://docs.cribl.io/stream/usecase-azure-sentinel/
+
+### 3.1. Preparation
+
+https://docs.cribl.io/stream/usecase-azure-workspace/
+
+#### 3.1.1. Setup Entra Identity for Cribl
+
+Create app registration
+
+![image](https://github.com/user-attachments/assets/241a9a75-0ef9-49d9-ac03-c0c71144ed40)
+
+Create client secret
+
+![image](https://github.com/user-attachments/assets/aada95da-c047-41c6-a2f3-2e5a9e235cfd)
+
+#### 3.1.2. Configure Azure Monitor data collection
+
+Create DCE (Data Collection Endpoint)
+
+![image](https://github.com/user-attachments/assets/27bcb706-2e48-4bb9-bc89-4a6b22d4e331)
+
+Go to the created DCE and copy the Resource ID in JSON view
+
+![image](https://github.com/user-attachments/assets/529e388a-2707-4291-896f-3ae278726a94)
+
+Get the Resource ID for the LAW (Log Analytics Workspace)
+
+![image](https://github.com/user-attachments/assets/d6dc3570-beb1-497e-851c-5e23f915d6ff)
+
+Deploy DCR (Date Collection Rule)
+- Go to `Deploy a custom template`
+- Select `Build your own template in the editor`
+- Copy and paste the [Cribl DCR template](https://docs.cribl.io/stream/usecase-webhook-azure-sentinel-dcr-template/)
+
+![image](https://github.com/user-attachments/assets/9ab6e999-733d-4c79-adb1-786b67a1351c)
+
+Paste the DCE and LAW Resource IDs
+
+![image](https://github.com/user-attachments/assets/0768144f-c274-4d93-867b-96fe69671b42)
+
