@@ -317,13 +317,13 @@ Ref:
 
 ![image](https://github.com/user-attachments/assets/aada95da-c047-41c6-a2f3-2e5a9e235cfd)
 
-### 3.2. Create DCE (Data Collection Endpoint)
+### 3.2. Setup data collection
+
+#### 3.2.1. Create DCE (Data Collection Endpoint)
 
 ![image](https://github.com/user-attachments/assets/27bcb706-2e48-4bb9-bc89-4a6b22d4e331)
 
-### 3.3. Configure DCR (Data Collection Rule)
-
-#### 3.3.1. Create DCR using Cribl template
+#### 3.2.2. Create DCR (Data Collection Rule) using Cribl template
 
 Go to the created DCE and copy the Resource ID in JSON view:
 
@@ -333,7 +333,7 @@ Get the Resource ID for the LAW (Log Analytics Workspace):
 
 ![image](https://github.com/user-attachments/assets/d6dc3570-beb1-497e-851c-5e23f915d6ff)
 
-Deploy DCR (Date Collection Rule)
+Deploy DCR from [Cribl DCR template](https://docs.cribl.io/stream/usecase-webhook-azure-sentinel-dcr-template/)
 - Go to `Deploy a custom template`
 - Select `Build your own template in the editor`
 - Copy and paste the [Cribl DCR template](https://docs.cribl.io/stream/usecase-webhook-azure-sentinel-dcr-template/)
@@ -372,23 +372,11 @@ Select the Cribl application:
 
 ![image](https://github.com/user-attachments/assets/74285140-1bca-4a8f-87c7-535c0ef40d22)
 
-#### 3.3.2. Using Sentinel-created DCRs
-
-The DCE and enterprise application can also be associated to existing Sentinel-created DCRs to allow Cribl to use them
-
-![image](https://github.com/user-attachments/assets/709bf887-a317-4f08-befb-9e96e00abaa3)
-
-![image](https://github.com/user-attachments/assets/ad798b47-5e11-4b3e-af4b-bd90bcf89fc4)
-
-![image](https://github.com/user-attachments/assets/94082678-b0ad-43b5-997c-2e1521cfa21d)
-
-![image](https://github.com/user-attachments/assets/0fd6c00e-49c9-4e26-8e03-35a17e92a617)
-
-### 3.4. Configure data destination to Sentinel in Cribl
+### 3.3. Configure data destination to Sentinel in Cribl
 
 ![image](https://github.com/user-attachments/assets/c696e59e-8924-4872-9981-134beea9f87f)
 
-#### 3.4.1. General Settings
+#### 3.3.1. General Settings
 
 Retrieving required information for configuration:
 
@@ -423,7 +411,7 @@ Configuration of Sentinel as data destination in Cribl can be done using `URL` o
 
 ![image](https://github.com/user-attachments/assets/db1e49c6-cc0a-44f9-93cb-2767eddc6b1e)
 
-#### 3.4.2. Authentication
+#### 3.3.2. Authentication
 
 |Field|Description|
 |---|---|
