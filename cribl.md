@@ -293,33 +293,43 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 
 ## 3. Microsoft Sentinel Integration
 
-https://docs.cribl.io/stream/usecase-azure-sentinel/
+Ref:
+- https://docs.cribl.io/stream/usecase-azure-workspace/
+- https://docs.cribl.io/stream/destinations-sentinel/
 
-### 3.1. Preparation
+### 3.1. Setup Entra Identity for Cribl
 
-https://docs.cribl.io/stream/usecase-azure-workspace/
+#### 3.1.1. Create app registration
 
-#### 3.1.1. Setup Entra Identity for Cribl
-
-Create app registration
+> [!Note]
+>
+> Take note of the `Application (client) ID` and `Directory (tenant) ID`; these will be required later.
 
 ![image](https://github.com/user-attachments/assets/241a9a75-0ef9-49d9-ac03-c0c71144ed40)
 
-Create client secret
+#### 3.1.2. Create client secret
+
+> [!Important]
+>
+> The client secret is displayed **only once**, copy and store it securely right after creation
+>
+> There is no way to retrieve the client secret if it's lost, it will need to be deleted and create a new one
 
 ![image](https://github.com/user-attachments/assets/aada95da-c047-41c6-a2f3-2e5a9e235cfd)
 
-#### 3.1.2. Configure Azure Monitor data collection
-
-Create DCE (Data Collection Endpoint)
+### 3.2. Create DCE (Data Collection Endpoint)
 
 ![image](https://github.com/user-attachments/assets/27bcb706-2e48-4bb9-bc89-4a6b22d4e331)
 
-Go to the created DCE and copy the Resource ID in JSON view
+### 3.3. Configure DCR (Data Collection Rule)
+
+#### 3.3.1. Create DCR using Cribl template
+
+Go to the created DCE and copy the Resource ID in JSON view:
 
 ![image](https://github.com/user-attachments/assets/529e388a-2707-4291-896f-3ae278726a94)
 
-Get the Resource ID for the LAW (Log Analytics Workspace)
+Get the Resource ID for the LAW (Log Analytics Workspace):
 
 ![image](https://github.com/user-attachments/assets/d6dc3570-beb1-497e-851c-5e23f915d6ff)
 
@@ -334,3 +344,80 @@ Paste the DCE and LAW Resource IDs
 
 ![image](https://github.com/user-attachments/assets/0768144f-c274-4d93-867b-96fe69671b42)
 
+Add role assignment to the DCR
+
+> [!Note]
+>
+> In Entra, app registration contains information about the application, usually including URLs for SSO (Single Sign-On)
+>
+> An enterprise application is created automatically when an app is registered
+>
+> The enterprise application resource is the service prinicipal (i.e. service account or machine identity) of the application
+>
+> Permissions can be granted to the application by role assignment to the application resource
+
+DCR → Access Control (IAM) → Add role assignment
+
+Select `Monitoring Metrics Publisher` role:
+
+![image](https://github.com/user-attachments/assets/3805332f-5f90-4b1e-b075-c52ca0e0477d)
+
+Select the Cribl application:
+
+> [!Tip]
+>
+> https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal#assign-a-role-to-the-application
+>
+> By default, Microsoft Entra applications aren't displayed in the available options. Search for the application by name to find it.
+
+![image](https://github.com/user-attachments/assets/74285140-1bca-4a8f-87c7-535c0ef40d22)
+
+#### 3.3.2. Using Sentinel-created DCRs
+
+The DCE and enterprise application can also be associated to existing Sentinel-created DCRs to allow Cribl to use them
+
+![image](https://github.com/user-attachments/assets/709bf887-a317-4f08-befb-9e96e00abaa3)
+
+![image](https://github.com/user-attachments/assets/ad798b47-5e11-4b3e-af4b-bd90bcf89fc4)
+
+![image](https://github.com/user-attachments/assets/94082678-b0ad-43b5-997c-2e1521cfa21d)
+
+![image](https://github.com/user-attachments/assets/0fd6c00e-49c9-4e26-8e03-35a17e92a617)
+
+### 3.4. Configure data destination to Sentinel in Cribl
+
+![image](https://github.com/user-attachments/assets/c696e59e-8924-4872-9981-134beea9f87f)
+
+#### 3.4.1. General Settings
+
+Retrieving required information for configuration:
+
+|Field|Description|
+|---|---|
+|Data collection endpoint|Data collection endpoint (DCE) in the format `https://<endpoint-name>.<identifier>.<region>.ingest.monitor.azure.com`.<br>![image](https://github.com/user-attachments/assets/d5ae0c7c-af03-4035-ba87-17129f707c33)|
+|Data collection rule ID|DCR Immutable ID:<br>![image](https://github.com/user-attachments/assets/4009798f-e1e3-410a-a2ba-7b745533c06a)|
+|Stream name|Name of the Sentinel table in which to store events.<br>![image](https://github.com/user-attachments/assets/3049dc6f-e974-451e-bf0e-afadd15c47b7)|
+
+Cribl provides the [Azure Resource Graph Explorer](https://docs.cribl.io/stream/usecase-azure-sentinel/#obtaining-url) to retrieve the required information
+
+![image](https://github.com/user-attachments/assets/28cf0e79-2d6b-414c-9054-5675082cd05d)
+
+Configuration of Sentinel as data destination in Cribl can be done using `URL` or `ID`
+
+![image](https://github.com/user-attachments/assets/942eb45a-13ad-42a7-b496-2cd53e3a07f6)
+
+![image](https://github.com/user-attachments/assets/4a9034f4-014c-4b4f-aa2c-f933e3990533)
+
+#### 3.4.2. Authentication
+
+|Field|Description|
+|---|---|
+|Login URL|The token API endpoint for the Microsoft identity platform. Use the string: `https://login.microsoftonline.com/<tenant_id>/oauth2/v2.0/token`, substituting `<tenant_id>` with Entra ID tenant ID.<br>The Directory (tenant) ID listed on the app's Overview page.<br>![image](https://github.com/user-attachments/assets/fe35d5c5-6112-476e-88d1-b03bb51c1649)|
+|OAuth secret|The client secret generated in [3.1.2. Create client secret](#312-create-client-secret)|
+|Client ID|The Application (client) ID listed on the app's Overview page.<br>![image](https://github.com/user-attachments/assets/e4ef9523-65e4-4c81-8195-d5a5e2e029ab)|
+
+> [!Tip]
+>
+> The client ID is entered as a json constant (i.e. enclosing the value with backticks <code>`</code>)
+
+![image](https://github.com/user-attachments/assets/bf230cf4-df3e-4c65-8e78-b0b23d07844b)
