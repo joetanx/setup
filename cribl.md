@@ -323,15 +323,15 @@ Ref:
 
 ![image](https://github.com/user-attachments/assets/27bcb706-2e48-4bb9-bc89-4a6b22d4e331)
 
-#### 3.2.2. Create DCR (Data Collection Rule) using Cribl template
+#### 3.2.2. Create DCR (Data Collection Rule) using [Cribl DCR template](https://docs.cribl.io/stream/usecase-webhook-azure-sentinel-dcr-template/)
 
 Go to the created DCE and copy the Resource ID in JSON view:
 
-![image](https://github.com/user-attachments/assets/529e388a-2707-4291-896f-3ae278726a94)
+![image](https://github.com/user-attachments/assets/b5c8c323-30df-4903-a114-0df6f6071a42)
 
-Get the Resource ID for the LAW (Log Analytics Workspace):
+Get the Resource ID for the target LAW (Log Analytics Workspace):
 
-![image](https://github.com/user-attachments/assets/d6dc3570-beb1-497e-851c-5e23f915d6ff)
+![image](https://github.com/user-attachments/assets/73ede50a-1327-4f6d-808c-f3971db4efe1)
 
 Deploy DCR from [Cribl DCR template](https://docs.cribl.io/stream/usecase-webhook-azure-sentinel-dcr-template/)
 - Go to `Deploy a custom template`
@@ -342,7 +342,7 @@ Deploy DCR from [Cribl DCR template](https://docs.cribl.io/stream/usecase-webhoo
 
 Paste the DCE and LAW Resource IDs
 
-![image](https://github.com/user-attachments/assets/0768144f-c274-4d93-867b-96fe69671b42)
+![image](https://github.com/user-attachments/assets/9c959ea1-896d-4478-89a9-476e39a966ca)
 
 Add role assignment to the DCR
 
@@ -360,7 +360,7 @@ DCR → Access Control (IAM) → Add role assignment
 
 Select `Monitoring Metrics Publisher` role:
 
-![image](https://github.com/user-attachments/assets/3805332f-5f90-4b1e-b075-c52ca0e0477d)
+![image](https://github.com/user-attachments/assets/92a4c7f7-3e46-4134-80b5-f8c88fa4655f)
 
 Select the Cribl application:
 
@@ -370,7 +370,7 @@ Select the Cribl application:
 >
 > By default, Microsoft Entra applications aren't displayed in the available options. Search for the application by name to find it.
 
-![image](https://github.com/user-attachments/assets/74285140-1bca-4a8f-87c7-535c0ef40d22)
+![image](https://github.com/user-attachments/assets/73032eb5-7e29-4318-92e6-8fc0460e8200)
 
 ### 3.3. Configure data destination to Sentinel in Cribl
 
@@ -383,8 +383,8 @@ Retrieving required information for configuration:
 |Field|Description|
 |---|---|
 |Data collection endpoint|Data collection endpoint (DCE) in the format `https://<endpoint-name>.<identifier>.<region>.ingest.monitor.azure.com`.<br>![image](https://github.com/user-attachments/assets/d5ae0c7c-af03-4035-ba87-17129f707c33)|
-|Data collection rule ID|DCR Immutable ID:<br>![image](https://github.com/user-attachments/assets/4009798f-e1e3-410a-a2ba-7b745533c06a)|
-|Stream name|Name of the Sentinel table in which to store events.<br>![image](https://github.com/user-attachments/assets/3049dc6f-e974-451e-bf0e-afadd15c47b7)|
+|Data collection rule ID|DCR Immutable ID:<br>![image](https://github.com/user-attachments/assets/aa03b33e-2bc9-4ddc-9367-a1a0d92e4a47)|
+|Stream name|Name of the Sentinel table in which to store events.<br>![image](https://github.com/user-attachments/assets/5fb1040a-6a5e-451d-8c7f-27c6a6099a39)|
 
 Cribl provides the [Azure Resource Graph Explorer](https://docs.cribl.io/stream/usecase-azure-sentinel/#obtaining-url) to retrieve the required information
 
@@ -399,17 +399,17 @@ Resources
 | project name, StreamName, Endpoint = strcat(endpoint, '/dataCollectionRules/',ImmutableId,'/streams/',StreamName,'?api-version=2023-01-01')
 ```
 
-![image](https://github.com/user-attachments/assets/28cf0e79-2d6b-414c-9054-5675082cd05d)
+![image](https://github.com/user-attachments/assets/bf18edcd-0b2f-46c3-b8ca-b7a018047f34)
 
 Configuration of Sentinel as data destination in Cribl can be done using `URL` or `ID`
 
-![image](https://github.com/user-attachments/assets/5f072ed8-76c0-41b1-9038-0342a87dfefa)
+![image](https://github.com/user-attachments/assets/ab09131f-b622-4682-9799-0a4537abfd0a)
 
-![image](https://github.com/user-attachments/assets/62406f1c-4d51-4804-a1cc-db4e80581036)
+![image](https://github.com/user-attachments/assets/5dd854e1-3f1b-4968-8eef-0e6d064a39f0)
 
-![image](https://github.com/user-attachments/assets/9a97851c-65e5-492a-9cc5-c246bd6b2afe)
+![image](https://github.com/user-attachments/assets/7989426a-14bd-4ab0-9704-6c4957ebe444)
 
-![image](https://github.com/user-attachments/assets/db1e49c6-cc0a-44f9-93cb-2767eddc6b1e)
+![image](https://github.com/user-attachments/assets/78c8c42f-a1d0-4e49-8a32-6f6f9413bcd2)
 
 #### 3.3.2. Authentication
 
@@ -424,3 +424,33 @@ Configuration of Sentinel as data destination in Cribl can be done using `URL` o
 > The client ID is entered as a json constant (i.e. enclosing the value with backticks <code>`</code>)
 
 ![image](https://github.com/user-attachments/assets/bf230cf4-df3e-4c65-8e78-b0b23d07844b)
+
+#### 3.3.3. Test the data destination
+
+![image](https://github.com/user-attachments/assets/86a05cc5-1e74-4a94-a5b4-33bd17bd803d)
+
+![image](https://github.com/user-attachments/assets/e17f730e-c4b7-4c7f-9eb7-41e02198e623)
+
+### 3.4. Get Cribl packs for Sentinel
+
+Processing → Packs → Add Pack → Add from Dispensary
+
+![image](https://github.com/user-attachments/assets/4db69995-ca12-4b5c-9728-e57da448270a)
+
+Search for `Sentinel`
+
+![image](https://github.com/user-attachments/assets/00edba8c-9490-4ff3-bfa3-cbbcf8a2940d)
+
+The `Microsoft Sentinel` pack published by Christoph Dittmann (cdittmann@cribl.io) works pretty well to parse out most events to column in the LAW tables
+
+![image](https://github.com/user-attachments/assets/84926765-dac0-4221-932f-82b5c348d7fc)
+
+Add the pack and check out the pipelines available, the `microsoft-sentinel-syslog`, `wef_security_events` and `wef-to-windows-events` is useful for most Windows and Linux logs scenarios
+
+![image](https://github.com/user-attachments/assets/dc5c494f-0c86-4705-ba67-5a351ed7feee)
+
+### 3.5. Configure routes
+
+![image](https://github.com/user-attachments/assets/b5561831-d670-4ad6-a7b1-914e55f4116f)
+
+![image](https://github.com/user-attachments/assets/31a0ad5d-b15c-445a-b0d8-e6dbd96e56e8)
