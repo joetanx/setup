@@ -400,6 +400,17 @@ Retrieving required information for configuration:
 
 Cribl provides the [Azure Resource Graph Explorer](https://docs.cribl.io/stream/usecase-azure-sentinel/#obtaining-url) to retrieve the required information
 
+```kusto
+Resources
+| where type =~ 'microsoft.insights/datacollectionrules'
+| mv-expand Streams= properties['dataFlows']
+| project name, id, DCE = tostring(properties['dataCollectionEndpointId']), ImmutableId = properties['immutableId'], StreamName = Streams['streams'][0]
+| join kind=leftouter (Resources
+| where type =~ 'microsoft.insights/datacollectionendpoints'
+| project name,  DCE = tostring(id), endpoint = properties['logsIngestion']['endpoint']) on DCE
+| project name, StreamName, Endpoint = strcat(endpoint, '/dataCollectionRules/',ImmutableId,'/streams/',StreamName,'?api-version=2023-01-01')
+```
+
 ![image](https://github.com/user-attachments/assets/28cf0e79-2d6b-414c-9054-5675082cd05d)
 
 Configuration of Sentinel as data destination in Cribl can be done using `URL` or `ID`
