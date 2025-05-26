@@ -441,16 +441,42 @@ Search for `Sentinel`
 
 ![image](https://github.com/user-attachments/assets/00edba8c-9490-4ff3-bfa3-cbbcf8a2940d)
 
-The `Microsoft Sentinel` pack published by Christoph Dittmann (cdittmann@cribl.io) works pretty well to parse out most events to column in the LAW tables
+The `Microsoft Sentinel` pack by Christoph Dittmann (cdittmann@cribl.io) works well to parse Windows events to column in the SecurityEvent table
 
 ![image](https://github.com/user-attachments/assets/84926765-dac0-4221-932f-82b5c348d7fc)
 
-Add the pack and check out the pipelines available, the `microsoft-sentinel-syslog`, `wef_security_events` and `wef-to-windows-events` is useful for most Windows and Linux logs scenarios
+The `Microsoft Sentinel Syslog` pack by Dan Schmitz (dschmitz@cribl.io) works well to parse Linux events to column in the Syslog table
 
-![image](https://github.com/user-attachments/assets/dc5c494f-0c86-4705-ba67-5a351ed7feee)
+![image](https://github.com/user-attachments/assets/df9c2744-e070-4f34-95e6-61212a6bf783)
 
 ### 3.5. Configure routes
 
-![image](https://github.com/user-attachments/assets/b5561831-d670-4ad6-a7b1-914e55f4116f)
+![image](https://github.com/user-attachments/assets/8796bfd4-2352-456b-b95a-683d911677ea)
 
-![image](https://github.com/user-attachments/assets/31a0ad5d-b15c-445a-b0d8-e6dbd96e56e8)
+### 3.6. Verify data flow in Cribl
+
+Sources:
+
+![image](https://github.com/user-attachments/assets/0476b027-801d-499d-9f39-aa9dce492f8c)
+
+Routes:
+
+![image](https://github.com/user-attachments/assets/60fd98a5-25df-4072-b750-8d9c5fc7194d)
+
+Packs:
+
+![image](https://github.com/user-attachments/assets/27e5faaa-2067-46cd-8588-c79ad3488236)
+
+Destinations:
+
+![image](https://github.com/user-attachments/assets/1d06afeb-5d12-4222-ab94-b3b574282e53)
+
+### 3.7. Verify events ingested in Sentinel
+
+SecurityEvent table:
+
+![image](https://github.com/user-attachments/assets/6ab50489-e4ca-44ca-a35c-8e2e20bcbdd6)
+
+Syslog table:
+
+![image](https://github.com/user-attachments/assets/56a42c72-051e-491a-b0ed-54e7d982d21f)
