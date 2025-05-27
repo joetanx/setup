@@ -75,7 +75,7 @@ systemctl start cribl
 
 ## 2. Configure data sources
 
-![image](https://github.com/user-attachments/assets/5b6c8fc2-ae06-407c-b22d-ba2149d87ca0)
+![image](https://github.com/user-attachments/assets/af9acba5-4dbc-4429-b6a2-f79179197b5e)
 
 ### 2.1. Syslog
 
@@ -83,15 +83,15 @@ systemctl start cribl
 
 A default syslog source is configured for both TCP and UDP on port 9514 and is not enabled:
 
-![image](https://github.com/user-attachments/assets/bd2cdc7f-505f-46d4-b539-d514cd26e80d)
+![image](https://github.com/user-attachments/assets/dbbff765-90cf-406e-bf92-987e143e3d8d)
 
 Enable the data source and clear the UDP port field if not using:
 
-![image](https://github.com/user-attachments/assets/5ff9e526-edeb-4ecd-845c-19d032e811ce)
+![image](https://github.com/user-attachments/assets/7d936ac9-3c12-40ab-acba-1a72b08dd4e1)
 
 Configure TLS for the TCP syslog listener:
 
-![image](https://github.com/user-attachments/assets/ca81f5dd-33fa-4571-811f-be24d49e3ff0)
+![image](https://github.com/user-attachments/assets/912933fb-a8d1-4149-83e1-4f7412a5359c)
 
 #### 2.1.2. Client configuration
 
@@ -153,7 +153,7 @@ systemctl restart rsyslog
 
 Start a capture in `Live Data` tab of the data source and see if events are coming in
 
-![image](https://github.com/user-attachments/assets/547aed01-9780-4056-a0e9-b1c6bd903355)
+![image](https://github.com/user-attachments/assets/71bcd6bb-9f9b-425e-bc6a-76db68177759)
 
 ### 2.2. Windows Event Forwarder
 
@@ -182,11 +182,11 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 >
 > The CA certificate chain configured would be used to validate client certificates
 
-![image](https://github.com/user-attachments/assets/bfe32db3-19fc-454e-bce3-b519da5703b7)
+![image](https://github.com/user-attachments/assets/b9198c44-1953-44c3-ba7e-4514d5c71a7f)
 
 ##### Configure subscription and the logs to collect
 
-![image](https://github.com/user-attachments/assets/73d4c449-92af-41b7-9e71-fac172c57b83)
+![image](https://github.com/user-attachments/assets/d356c23c-9067-4058-a39d-79f74880431d)
 
 > [!Tip]
 >
@@ -283,11 +283,11 @@ Event `100`: `The subscription <sbuscription-name> is created successfully.`
 
 Start a capture in `Live Data` tab of the data source and see if events are coming in
 
-![image](https://github.com/user-attachments/assets/d4c5d7f2-e719-48aa-a93b-b40319d79bd7)
+![image](https://github.com/user-attachments/assets/90e5e27d-64e3-4f70-ac9d-5a073f46c0bb)
 
 ### 2.3. Monitoring data sources
 
-![image](https://github.com/user-attachments/assets/1268b325-e73e-440b-bb14-91bc8d75ac79)
+![image](https://github.com/user-attachments/assets/e0b2348b-f37e-4c83-80c0-1555a1dcb16d)
 
 ## 3. Microsoft Sentinel Integration
 
@@ -372,7 +372,7 @@ Select the Cribl application:
 
 ### 3.3. Configure data destination to Sentinel in Cribl
 
-![image](https://github.com/user-attachments/assets/c696e59e-8924-4872-9981-134beea9f87f)
+![image](https://github.com/user-attachments/assets/3182c6fe-dd13-41d4-8ae6-028c049d590f)
 
 #### 3.3.1. General Settings
 
@@ -401,13 +401,13 @@ Resources
 
 Configuration of Sentinel as data destination in Cribl can be done using `URL` or `ID`
 
-![image](https://github.com/user-attachments/assets/ab09131f-b622-4682-9799-0a4537abfd0a)
+![image](https://github.com/user-attachments/assets/31764db1-b3f1-4f75-8ef2-32704a058be2)
 
-![image](https://github.com/user-attachments/assets/5dd854e1-3f1b-4968-8eef-0e6d064a39f0)
+![image](https://github.com/user-attachments/assets/86faccc4-6354-4316-9303-4989b7847211)
 
-![image](https://github.com/user-attachments/assets/7989426a-14bd-4ab0-9704-6c4957ebe444)
+![image](https://github.com/user-attachments/assets/ed19be71-18dd-4c1e-854e-7ded4b63edf2)
 
-![image](https://github.com/user-attachments/assets/78c8c42f-a1d0-4e49-8a32-6f6f9413bcd2)
+![image](https://github.com/user-attachments/assets/25d56410-23c1-40fa-b9f4-95a54bdda486)
 
 #### 3.3.2. Authentication
 
@@ -421,31 +421,31 @@ Configuration of Sentinel as data destination in Cribl can be done using `URL` o
 >
 > The client ID is entered as a json constant (i.e. enclosing the value with backticks <code>`</code>)
 
-![image](https://github.com/user-attachments/assets/bf230cf4-df3e-4c65-8e78-b0b23d07844b)
+![image](https://github.com/user-attachments/assets/d03b02d7-1f18-471b-a2df-7e03e345326c)
 
 #### 3.3.3. Test the data destination
 
-![image](https://github.com/user-attachments/assets/86a05cc5-1e74-4a94-a5b4-33bd17bd803d)
+![image](https://github.com/user-attachments/assets/65d19943-83b9-47a1-893c-95f32f0a3fbb)
 
-![image](https://github.com/user-attachments/assets/e17f730e-c4b7-4c7f-9eb7-41e02198e623)
+![image](https://github.com/user-attachments/assets/6bf978b7-00d3-40c9-9f43-3815aeb17caa)
 
 ### 3.4. Get Cribl packs for Sentinel
 
 Processing → Packs → Add Pack → Add from Dispensary
 
-![image](https://github.com/user-attachments/assets/4db69995-ca12-4b5c-9728-e57da448270a)
+![image](https://github.com/user-attachments/assets/b6626ad8-98ec-4935-8bf4-0f89b6be4287)
 
 Search for `Sentinel`
 
-![image](https://github.com/user-attachments/assets/00edba8c-9490-4ff3-bfa3-cbbcf8a2940d)
+![image](https://github.com/user-attachments/assets/4b0f770c-d273-4789-9d6f-3a685a671807)
 
-The `Microsoft Sentinel` pack by Christoph Dittmann (cdittmann@cribl.io) works well to parse Windows events to column in the SecurityEvent table
+The `Microsoft Sentinel` pack by Christoph Dittmann (cdittmann@cribl.io) includes a wef pipeline to parse Windows events to columns in the SecurityEvent table
 
-![image](https://github.com/user-attachments/assets/84926765-dac0-4221-932f-82b5c348d7fc)
+![image](https://github.com/user-attachments/assets/60c366f2-b85e-467a-975c-e19cabc2a6da)
 
-The `Microsoft Sentinel Syslog` pack by Dan Schmitz (dschmitz@cribl.io) works well to parse Linux events to column in the Syslog table
+The `Microsoft Sentinel Syslog` pack by Dan Schmitz (dschmitz@cribl.io) includes a syslog pipeline to parse syslog events to columns in the Syslog table
 
-![image](https://github.com/user-attachments/assets/df9c2744-e070-4f34-95e6-61212a6bf783)
+![image](https://github.com/user-attachments/assets/3d1bf2f7-7e5e-47d6-b845-d0029570559c)
 
 ### 3.5. Configure routes
 
