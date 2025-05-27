@@ -63,17 +63,15 @@ systemctl start cribl
 
 #### 1.6.1. Add certificate
 
-![image](https://github.com/user-attachments/assets/b43306c4-524c-4acf-a55d-57621d2c58b0)
+![image](https://github.com/user-attachments/assets/dd7d834c-eff4-4daf-9a19-184ba0f3dd5f)
 
-![image](https://github.com/user-attachments/assets/93710ca0-4bd0-4f21-a108-9c6512ce75b3)
+![image](https://github.com/user-attachments/assets/0aa72a42-ec31-41e3-9d97-f2f02e6430ee)
 
 #### 1.6.2. Configure TLS with the added certificate
 
-![image](https://github.com/user-attachments/assets/f71abdc9-94ba-4bb9-95a9-5b5a77f50d46)
+![image](https://github.com/user-attachments/assets/da24e15f-395a-4627-8c18-ae48591a87cb)
 
-![image](https://github.com/user-attachments/assets/bdc37100-2d92-4909-bdf5-c31b8559dfba)
-
-![image](https://github.com/user-attachments/assets/bf9915fe-9f62-4366-9ea6-4a0d04d077e3)
+![image](https://github.com/user-attachments/assets/4a5e045e-9394-4d6b-a00b-6e3d338fd665)
 
 ## 2. Configure data sources
 
