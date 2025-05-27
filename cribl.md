@@ -447,34 +447,77 @@ The `Microsoft Sentinel Syslog` pack by Dan Schmitz (dschmitz@cribl.io) includes
 
 ![image](https://github.com/user-attachments/assets/3d1bf2f7-7e5e-47d6-b845-d0029570559c)
 
-### 3.5. Configure routes
+### 3.5. Configure pipelines
 
-![image](https://github.com/user-attachments/assets/8796bfd4-2352-456b-b95a-683d911677ea)
+#### 3.5.1. Syslog pipeline
 
-### 3.6. Verify data flow in Cribl
+Go to the `Microsoft Sentinel Syslog` pack and copy the `sentinel_syslog` pipeline
+
+![image](https://github.com/user-attachments/assets/acd092a1-29da-4698-912e-13af64c3538b)
+
+Paste the pipeline
+
+![image](https://github.com/user-attachments/assets/e35e2e92-4825-4ccc-a190-06006a4b7bc3)
+
+![image](https://github.com/user-attachments/assets/4b3bf871-b881-4cf9-80a9-d5021edc0a46)
+
+Edit the `Eval` step of the pipeline:
+- Change `String(facility) || facilityName` to `facilityName` for the `Facility` field
+  - Sentinel accepts `facilityName` (name) but not `facility` (number) for the `Facility` column
+- Add field for `SourceSystem`: `'Cribl'`
+- Add `SourceSystem` under `Keep fields`
+
+![image](https://github.com/user-attachments/assets/4a35caea-1dc7-4ab8-a0fa-462547dc6cef)
+
+#### 3.5.2. WEF pipeline
+
+Go to the `Microsoft Sentinel` pack and copy the `wef_security_events` pipeline
+
+![image](https://github.com/user-attachments/assets/8d82e239-55dc-46f4-90a5-57b662bbd333)
+
+Paste the pipeline
+
+![image](https://github.com/user-attachments/assets/db3f3372-ec4c-43c0-8fce-cefb2ffcc2cf)
+
+![image](https://github.com/user-attachments/assets/07913f12-14e1-4622-aa47-1b13018c27a3)
+
+The wef pipeline is usable right away, but additional modification can be done to keep XML or JSON copy of the `EventData` by enabling step 2 or step 6
+
+![image](https://github.com/user-attachments/assets/46ad22a1-6838-44ac-93f2-35f2655287b8)
+
+### 3.6. Configure routes
+
+|Route|Source|Pipeline|Destination|
+|---|---|---|---|
+|route_wef_to_sentinel|`__inputId=='wef:in_wef'`|sentinel_wef_securityevent|sentinel:out_sentinel_securityevent|
+|route_syslog_to_sentinel|`__inputId.startsWith('syslog:in_syslog:')`|sentinel_syslog|sentinel:out_sentinel_syslog|
+
+![image](https://github.com/user-attachments/assets/8fa284e7-bbaf-4caf-8595-26c5652f6fd3)
+
+### 3.7. Verify data flow in Cribl
 
 Sources:
 
-![image](https://github.com/user-attachments/assets/0476b027-801d-499d-9f39-aa9dce492f8c)
+![image](https://github.com/user-attachments/assets/45e85a9a-c9a5-4c63-b622-407a18795439)
 
 Routes:
 
-![image](https://github.com/user-attachments/assets/60fd98a5-25df-4072-b750-8d9c5fc7194d)
+![image](https://github.com/user-attachments/assets/055b0bc5-1d6f-43b3-a5c0-f2aec81d0bb2)
 
-Packs:
+Pipelines:
 
-![image](https://github.com/user-attachments/assets/27e5faaa-2067-46cd-8588-c79ad3488236)
+![image](https://github.com/user-attachments/assets/40d452e4-352d-44df-a3a5-3b65bbc0a397)
 
 Destinations:
 
-![image](https://github.com/user-attachments/assets/1d06afeb-5d12-4222-ab94-b3b574282e53)
+![image](https://github.com/user-attachments/assets/6ec3c85f-c7cf-49d6-8c63-86facd0e9bfc)
 
-### 3.7. Verify events ingested in Sentinel
+### 3.8. Verify events ingested in Sentinel
 
 SecurityEvent table:
 
-![image](https://github.com/user-attachments/assets/6ab50489-e4ca-44ca-a35c-8e2e20bcbdd6)
+![image](https://github.com/user-attachments/assets/1362af83-bdeb-413c-97f3-75c96d115c96)
 
 Syslog table:
 
-![image](https://github.com/user-attachments/assets/56a42c72-051e-491a-b0ed-54e7d982d21f)
+![image](https://github.com/user-attachments/assets/81bff44e-3407-4096-9783-dc8ec62a5eb4)
