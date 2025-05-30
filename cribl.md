@@ -506,9 +506,71 @@ Paste the pipeline
 
 ![image](https://github.com/user-attachments/assets/07913f12-14e1-4622-aa47-1b13018c27a3)
 
-The wef pipeline is usable right away, but additional modification can be done to keep XML or JSON copy of the `EventData` by enabling step 2 or step 6
+##### 3.5.2.1. Including `EventData` field
+
+A XML or JSON copy of the `EventData` can be contained in the `EventData` field by enabling step 2 or step 6 of the pipeline
 
 ![image](https://github.com/user-attachments/assets/46ad22a1-6838-44ac-93f2-35f2655287b8)
+
+The affects how Sentinel receives the event
+
+XML - LAW displays the `EventData` XML as a single line string:
+
+![image](https://github.com/user-attachments/assets/17f9ad06-97c4-47fb-8b05-b2890fa2e6d4)
+
+JSON - LAW displays the `EventData` JSON as a JSON object:
+
+![image](https://github.com/user-attachments/assets/e9a1ac83-396d-4c49-bf56-177cbc3afbfc)
+
+A Windows security event ingested directly via AMA conditional enriches the `EventData` field depending on the type of event
+
+Logon failure event (`4625`) does not have `EventData` field populated:
+
+![image](https://github.com/user-attachments/assets/1f659e4e-7fe6-46d6-b4c8-c9f5bca9f951)
+
+While privileged service event (`4673`) has the `EventData` field as XML, and LAW displays it as a multi-line XML:
+
+![image](https://github.com/user-attachments/assets/f34699fd-fdf0-4d60-be8f-3c1ad866530f)
+
+##### 3.5.2.2. Mapping activity to event ID
+
+A Windows security event ingested directly via AMA enriches the event with an `Activity` field according to the event ID
+
+This can be done in Cribl via `Lookup` function
+
+A list of event messages according to the [common security events collected by sentinel](https://learn.microsoft.com/en-us/azure/sentinel/windows-security-event-id-reference) is available [here](https://github.com/joetanx/mslab/blob/main/sentinel_security_events.csv)
+
+Upload the csv to Knowledge → Lookups:
+
+![image](https://github.com/user-attachments/assets/398139fe-322c-489e-b6ed-04973ae0ad78)
+
+![image](https://github.com/user-attachments/assets/01e5b84e-6459-4487-b7a1-e6b5deef4101)
+
+Add a lookup step to the pipeline:
+
+![image](https://github.com/user-attachments/assets/0c006dc6-c0d4-4cf8-94b9-7a10a0564c43)
+
+Place the lookup step before the clean up step and configure the following:
+
+Lookup file path: Select the uploaded `sentinel_security_events.csv`
+
+Lookup fields:
+
+|Lookup Field Name in Event|Corresponding Field Name in Lookup|
+|---|---|
+|`EventID`|`EventID`|
+
+Output fields:
+
+|Output Field Name from Lookup|Lookup Field Name in Event|
+|---|---|
+|`Activity`|`Activity`|
+
+![image](https://github.com/user-attachments/assets/624fb5f6-6c92-4c6d-b452-bc5aba506fee)
+
+The `Activity` column in Sentinel gets populated according to the lookup:
+
+![image](https://github.com/user-attachments/assets/daf21112-db2f-4634-b23d-7ba5b1858bb1)
 
 ### 3.6. Configure routes
 
@@ -541,8 +603,8 @@ Destinations:
 
 SecurityEvent table:
 
-![image](https://github.com/user-attachments/assets/1362af83-bdeb-413c-97f3-75c96d115c96)
+![image](https://github.com/user-attachments/assets/a5966e3d-7ca3-468f-811b-59e478f68f34)
 
 Syslog table:
 
-![image](https://github.com/user-attachments/assets/81bff44e-3407-4096-9783-dc8ec62a5eb4)
+![image](https://github.com/user-attachments/assets/49510af3-9de6-441d-be4a-68f3e9406c73)
