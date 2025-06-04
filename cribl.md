@@ -314,6 +314,51 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 
 ![image](https://github.com/user-attachments/assets/e0b2348b-f37e-4c83-80c0-1555a1dcb16d)
 
-## 3. Microsoft Sentinel Integration
+## 3. Output to local file
+
+### 3.1. Configure filesystem destination
+
+Ref: https://docs.cribl.io/stream/destinations-fs/
+
+> [!Tip]
+> 
+> The filesystem destination also supports NFS
+
+![image](https://github.com/user-attachments/assets/6ed9378e-b437-452e-9612-003306d0eb27)
+
+General Settings:
+
+|Parameter|Explanation|
+|---|---|
+|Output ID|The name of the destination, subdirectories are created at the Output location with the Output ID|
+|Output location|The local path on Cribl machine, the `cribl` user **must** have write permissions at this path|
+|Staging location|Optional: if present, Cribl will buffer files before compressing and moving to output location above<br>|
+|Partitioning expression|Default setting partitions by date using `C.Time.strftime(_time ? _time : Date.now()/1000, '%Y/%m/%d')`<br>If this field is empty: Cribl falls back to the event's `__partition` field value – if present - otherwise to the output location itself.
+|Compression|Whether to compress: select between `none` or `gzip`|
+|File name prefix expression|Customize file name prefix|
+|File name suffix expression|Customize file name suffix<br>The tarnary operator `{__compression === "gzip" ? ".gz" : ""}` automatically adds `.gz` to the file name if `gzip` comppression is selected|
+
+Post-Processing and Advanced Settings can just leave as default
+
+> [!Note]
+>
+> Create one destination each for `out_wef` and `out_syslog`
+
+![image](https://github.com/user-attachments/assets/cb4bab86-d43c-46d5-ab2e-94048b549fc5)
+
+### 3.2. Configure route to filesystem destination
+
+|Route|Source|Pipeline|Destination|
+|---|---|---|---|
+|route_wef_to_file|`__inputId=='wef:in_wef'`|main|filesystem:out_wef|
+|route_syslog_to_file|`__inputId.startsWith('syslog:in_syslog:')`|main|filesystem:out_syslog|
+
+![image](https://github.com/user-attachments/assets/b2bba395-bf4d-44ab-8297-a1cc316cabdd)
+
+### 3.3. Verify file output
+
+
+
+## 4. Microsoft Sentinel Integration
 
 Configure Cribl to send events to Sentinel: https://github.com/joetanx/sentinel/blob/main/cribl.md
