@@ -316,7 +316,24 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 
 ## 3. Output to local file
 
-### 3.1. Configure filesystem destination
+### 3.1. Prepare directories
+
+|Path|Purpose|
+|---|---|
+|`/opt/cribl/out_staging/`|Cribl filesystem output staging directory|
+|`/opt/cribl/out_syslog/`|Destination for syslog|
+|`/opt/cribl/out_wef/`|Destination for WEF|
+
+> [Important]
+>
+> The `cribl` user **must** have write permissions at these directories
+
+```sh
+mkdir /opt/cribl/{out_staging,out_syslog,out_wef}
+chown cribl:cribl /opt/cribl/{out_staging,out_syslog,out_wef}
+```
+
+### 3.2. Configure filesystem destination
 
 Ref: https://docs.cribl.io/stream/destinations-fs/
 
@@ -326,27 +343,37 @@ Ref: https://docs.cribl.io/stream/destinations-fs/
 
 ![image](https://github.com/user-attachments/assets/6ed9378e-b437-452e-9612-003306d0eb27)
 
-General Settings:
+**General Settings**:
 
 |Parameter|Explanation|
 |---|---|
-|Output ID|The name of the destination, subdirectories are created at the Output location with the Output ID|
-|Output location|The local path on Cribl machine, the `cribl` user **must** have write permissions at this path|
-|Staging location|Optional: if present, Cribl will buffer files before compressing and moving to output location above<br>|
-|Partitioning expression|Default setting partitions by date using `C.Time.strftime(_time ? _time : Date.now()/1000, '%Y/%m/%d')`<br>If this field is empty: Cribl falls back to the event's `__partition` field value – if present - otherwise to the output location itself.
+|Output ID|The name of the destination|
+|Output location|The `out_wef` and `out_syslog` directories prepared above|
+|Staging location|The `out_staging` directory prepared above|
+|Partitioning expression|Default setting partitions by date using `C.Time.strftime(_time ? _time : Date.now()/1000, '%Y/%m/%d')`<br>If this field is empty, Cribl uses the event's `__partition` field value<br>If the event doesn't have `__partition` field, Cribl falls back to the output location itself.
 |Compression|Whether to compress: select between `none` or `gzip`|
-|File name prefix expression|Customize file name prefix|
+|File name prefix expression|Customize file name prefix, default: `CriblOut`|
 |File name suffix expression|Customize file name suffix<br>The tarnary operator `{__compression === "gzip" ? ".gz" : ""}` automatically adds `.gz` to the file name if `gzip` comppression is selected|
 
-Post-Processing and Advanced Settings can just leave as default
+![image](https://github.com/user-attachments/assets/3b25d508-c699-4b34-9427-987400796081)
 
-> [!Note]
->
-> Create one destination each for `out_wef` and `out_syslog`
+![image](https://github.com/user-attachments/assets/9dd2330b-0788-43e8-97b5-9c970fd492b4)
 
-![image](https://github.com/user-attachments/assets/cb4bab86-d43c-46d5-ab2e-94048b549fc5)
+**Post-Processing**:
 
-### 3.2. Configure route to filesystem destination
+A pipeline can be assigned for post-processing here, we'll leave it empty and assign pipelines based on routes instead
+
+![image](https://github.com/user-attachments/assets/837ed28b-8434-48ab-b4dc-6471b824b79b)
+
+**Advanced Settings**:
+
+There are several _advanced settings_ that can fine tune the behaviour of sizes, durations, performance, etc
+
+Default settings below would suffice
+
+![image](https://github.com/user-attachments/assets/891c907f-fca4-4636-9205-30ffc35ac14d)
+
+### 3.3. Configure route to filesystem destination
 
 |Route|Source|Pipeline|Destination|
 |---|---|---|---|
@@ -355,9 +382,157 @@ Post-Processing and Advanced Settings can just leave as default
 
 ![image](https://github.com/user-attachments/assets/b2bba395-bf4d-44ab-8297-a1cc316cabdd)
 
-### 3.3. Verify file output
+### 3.4. Verify file output
 
+Cribl creates a folder structure in the staging location for each destination:
 
+```console
+[root@delta ~]# ls -lRh /opt/cribl/out_staging/
+/opt/cribl/out_staging/:
+total 0
+drwxr-xr-x. 4 cribl cribl 120 Jun  4 11:42 out_syslog
+drwxr-xr-x. 4 cribl cribl 120 Jun  4 11:42 out_wef
+
+/opt/cribl/out_staging/out_syslog:
+total 8.0K
+drwxr-xr-x. 2 cribl cribl  6 Jun  4 11:38 Bucket_20250604_1130
+drwxr-xr-x. 2 cribl cribl  6 Jun  4 11:40 Bucket_20250604_1140
+-rw-r--r--. 1 cribl cribl 12 Jun  4 11:42 CriblOpenFiles.0.json
+-rw-r--r--. 1 cribl cribl 12 Jun  4 11:42 CriblOpenFiles.1.json
+
+/opt/cribl/out_staging/out_syslog/Bucket_20250604_1130:
+total 0
+
+/opt/cribl/out_staging/out_syslog/Bucket_20250604_1140:
+total 0
+
+/opt/cribl/out_staging/out_wef:
+total 8.0K
+drwxr-xr-x. 2 cribl cribl   6 Jun  4 11:40 Bucket_20250604_1130
+drwxr-xr-x. 2 cribl cribl  40 Jun  4 11:42 Bucket_20250604_1140
+-rw-r--r--. 1 cribl cribl  12 Jun  4 11:42 CriblOpenFiles.0.json
+-rw-r--r--. 1 cribl cribl 129 Jun  4 11:42 CriblOpenFiles.1.json
+
+/opt/cribl/out_staging/out_wef/Bucket_20250604_1130:
+total 0
+
+/opt/cribl/out_staging/out_wef/Bucket_20250604_1140:
+total 192K
+-rw-r--r--. 1 cribl cribl 69K Jun  4 11:42 CriblOut-KtUMq1.1.json.tmp
+```
+
+As the partitioning expression was left empty, the output files are simply placed on the respective directories, without any subdirectories structure:
+
+```console
+[root@delta ~]# ls -lRh /opt/cribl/{out_syslog,out_wef}
+/opt/cribl/out_syslog:
+total 1.9M
+-rw-r--r--. 1 cribl cribl 391K Jun  4 11:38 CriblOut-1s8ueO.0.json
+-rw-r--r--. 1 cribl cribl 1.5M Jun  4 11:38 CriblOut-Bq5tGM.1.json
+-rw-r--r--. 1 cribl cribl  713 Jun  4 11:46 CriblOut-E5gLLk.0.json
+-rw-r--r--. 1 cribl cribl 5.8K Jun  4 11:48 CriblOut-hBnxRN.0.json
+-rw-r--r--. 1 cribl cribl 3.5K Jun  4 11:40 CriblOut-JrGwzh.1.json
+-rw-r--r--. 1 cribl cribl 4.5K Jun  4 11:40 CriblOut-OfU90U.0.json
+-rw-r--r--. 1 cribl cribl 1.8K Jun  4 11:43 CriblOut-OLyKhS.0.json
+-rw-r--r--. 1 cribl cribl 6.1K Jun  4 11:48 CriblOut-sLJTLC.1.json
+
+/opt/cribl/out_wef:
+total 536K
+-rw-r--r--. 1 cribl cribl 25K Jun  4 11:43 CriblOut-11YwFF.1.json
+-rw-r--r--. 1 cribl cribl 54K Jun  4 11:38 CriblOut-cfouGF.1.json
+-rw-r--r--. 1 cribl cribl 50K Jun  4 11:47 CriblOut-fDCbbT.1.json
+-rw-r--r--. 1 cribl cribl 30K Jun  4 11:44 CriblOut-iA1vIP.1.json
+-rw-r--r--. 1 cribl cribl 44K Jun  4 11:46 CriblOut-JLPybW.1.json
+-rw-r--r--. 1 cribl cribl 19K Jun  4 11:45 CriblOut-jzxOsd.1.json
+-rw-r--r--. 1 cribl cribl 69K Jun  4 11:42 CriblOut-KtUMq1.1.json
+-rw-r--r--. 1 cribl cribl 97K Jun  4 11:40 CriblOut-wUXe4r.1.json
+-rw-r--r--. 1 cribl cribl 60K Jun  4 11:37 CriblOut-zaFZaM.1.json
+-rw-r--r--. 1 cribl cribl 71K Jun  4 11:39 CriblOut-zj8BCV.1.json
+```
+
+Example syslog output:
+
+```console
+[root@delta ~]# tail -n3 /opt/cribl/out_syslog/CriblOut-sLJTLC.1.json | jq
+```
+
+```json
+{
+  "message": "Failed password for invalid user doesnotexist from 192.168.84.11 port 53647 ssh2",
+  "severity": 6,
+  "facility": 10,
+  "host": "kube",
+  "appname": "sshd",
+  "procid": "7618",
+  "severityName": "info",
+  "facilityName": "authpriv",
+  "_time": 1749008920,
+  "_raw": "<86>Jun  4 11:48:40 kube sshd[7618]: Failed password for invalid user doesnotexist from 192.168.84.11 port 53647 ssh2",
+  "cribl": "yes"
+}
+{
+  "message": "Connection reset by invalid user doesnotexist 192.168.84.11 port 53647 [preauth]",
+  "severity": 6,
+  "facility": 10,
+  "host": "kube",
+  "appname": "sshd",
+  "procid": "7618",
+  "severityName": "info",
+  "facilityName": "authpriv",
+  "_time": 1749008921,
+  "_raw": "<86>Jun  4 11:48:41 kube sshd[7618]: Connection reset by invalid user doesnotexist 192.168.84.11 port 53647 [preauth]",
+  "cribl": "yes"
+}
+{
+  "message": "PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.84.11",
+  "severity": 5,
+  "facility": 10,
+  "host": "kube",
+  "appname": "sshd",
+  "procid": "7618",
+  "severityName": "notice",
+  "facilityName": "authpriv",
+  "_time": 1749008921,
+  "_raw": "<85>Jun  4 11:48:41 kube sshd[7618]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.84.11",
+  "cribl": "yes"
+}
+```
+
+Example wef output:
+
+```console
+[root@delta ~]# tail -n3 /opt/cribl/out_wef/CriblOut-zj8BCV.1.json | jq
+```
+
+```json
+{
+  "_raw": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Security-Auditing' Guid='{54849625-5478-4994-a5ba-3e3b0328c30d}'/><EventID>4672</EventID><Version>0</Version><Level>0</Level><Task>12548</Task><Opcode>0</Opcode><Keywords>0x8020000000000000</Keywords><TimeCreated SystemTime='2025-06-04T03:56:05.4226889Z'/><EventRecordID>1393</EventRecordID><Correlation/><Execution ProcessID='848' ThreadID='5208'/><Channel>Security</Channel><Computer>DC.lab.vx</Computer><Security/></System><EventData><Data Name='SubjectUserSid'>S-1-5-18</Data><Data Name='SubjectUserName'>DC$</Data><Data Name='SubjectDomainName'>LAB</Data><Data Name='SubjectLogonId'>0xcbdfb1</Data><Data Name='PrivilegeList'>SeSecurityPrivilege\r\n\t\t\tSeBackupPrivilege\r\n\t\t\tSeRestorePrivilege\r\n\t\t\tSeTakeOwnershipPrivilege\r\n\t\t\tSeDebugPrivilege\r\n\t\t\tSeSystemEnvironmentPrivilege\r\n\t\t\tSeLoadDriverPrivilege\r\n\t\t\tSeImpersonatePrivilege\r\n\t\t\tSeDelegateSessionUserImpersonatePrivilege\r\n\t\t\tSeEnableDelegationPrivilege</Data></EventData></Event>",
+  "sourcetype": "wef",
+  "source": "wef:in_wef",
+  "host": "192.168.17.20",
+  "sourceMachineID": "DC.lab.vx",
+  "_time": 1749009367.761,
+  "cribl": "yes"
+}
+{
+  "_raw": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Security-Auditing' Guid='{54849625-5478-4994-a5ba-3e3b0328c30d}'/><EventID>4624</EventID><Version>3</Version><Level>0</Level><Task>12544</Task><Opcode>0</Opcode><Keywords>0x8020000000000000</Keywords><TimeCreated SystemTime='2025-06-04T03:56:05.4228398Z'/><EventRecordID>1394</EventRecordID><Correlation/><Execution ProcessID='848' ThreadID='5208'/><Channel>Security</Channel><Computer>DC.lab.vx</Computer><Security/></System><EventData><Data Name='SubjectUserSid'>S-1-0-0</Data><Data Name='SubjectUserName'>-</Data><Data Name='SubjectDomainName'>-</Data><Data Name='SubjectLogonId'>0x0</Data><Data Name='TargetUserSid'>S-1-5-18</Data><Data Name='TargetUserName'>DC$</Data><Data Name='TargetDomainName'>LAB.VX</Data><Data Name='TargetLogonId'>0xcbdfb1</Data><Data Name='LogonType'>3</Data><Data Name='LogonProcessName'>Kerberos</Data><Data Name='AuthenticationPackageName'>Kerberos</Data><Data Name='WorkstationName'>-</Data><Data Name='LogonGuid'>{956ba283-e74f-d8fc-d7db-48603cebc1e2}</Data><Data Name='TransmittedServices'>-</Data><Data Name='LmPackageName'>-</Data><Data Name='KeyLength'>0</Data><Data Name='ProcessId'>0x0</Data><Data Name='ProcessName'>-</Data><Data Name='IpAddress'>127.0.0.1</Data><Data Name='IpPort'>61073</Data><Data Name='ImpersonationLevel'>%%1833</Data><Data Name='RestrictedAdminMode'>-</Data><Data Name='RemoteCredentialGuard'>-</Data><Data Name='TargetOutboundUserName'>-</Data><Data Name='TargetOutboundDomainName'>-</Data><Data Name='VirtualAccount'>%%1843</Data><Data Name='TargetLinkedLogonId'>0x0</Data><Data Name='ElevatedToken'>%%1842</Data></EventData></Event>",
+  "sourcetype": "wef",
+  "source": "wef:in_wef",
+  "host": "192.168.17.20",
+  "sourceMachineID": "DC.lab.vx",
+  "_time": 1749009367.761,
+  "cribl": "yes"
+}
+{
+  "_raw": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Security-Auditing' Guid='{54849625-5478-4994-a5ba-3e3b0328c30d}'/><EventID>4634</EventID><Version>0</Version><Level>0</Level><Task>12545</Task><Opcode>0</Opcode><Keywords>0x8020000000000000</Keywords><TimeCreated SystemTime='2025-06-04T03:56:05.4245315Z'/><EventRecordID>1395</EventRecordID><Correlation/><Execution ProcessID='848' ThreadID='904'/><Channel>Security</Channel><Computer>DC.lab.vx</Computer><Security/></System><EventData><Data Name='TargetUserSid'>S-1-5-18</Data><Data Name='TargetUserName'>DC$</Data><Data Name='TargetDomainName'>LAB</Data><Data Name='TargetLogonId'>0xcbdfb1</Data><Data Name='LogonType'>3</Data></EventData></Event>",
+  "sourcetype": "wef",
+  "source": "wef:in_wef",
+  "host": "192.168.17.20",
+  "sourceMachineID": "DC.lab.vx",
+  "_time": 1749009367.761,
+  "cribl": "yes"
+}
+```
 
 ## 4. Microsoft Sentinel Integration
 
