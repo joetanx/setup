@@ -170,7 +170,7 @@ True     False    PSCustomObject                           System.Object
 
 ##### Request code
 
-The `authorization` access token can be reference by `$response.authorization` and placed into header:
+The `authorization` access token can be referenced by `$response.authorization` and placed into header:
 
 ```pwsh
 $headers = @{
@@ -285,14 +285,27 @@ work-in-progress
 
 
 
-## Annex 0. `Invoke-WebRequest` vs `Invoke-RestMethod`
+## Annex 1. Getting response content for HTTP errors
 
-- `Invoke-WebRequest` general web request, puts response in a PowerShell object where content needs to be referenced by `$_.Content` or `| Select-Object -Expand Content`
-- `Invoke-RestMethod` works mostly with JSON APIs and would automatically expand a JSON response
+PowerShell's `Invoke-WebRequest` treats HTTP errors as exceptions
 
-## Annex 1. PowerShell data objects
+Hence, it doesn't store the response content when an error occurs
 
-### 1.1. Arrays
+The response content can be capture by exception handling:
+
+```pwsh
+try {
+    $response = Invoke-WebRequest -Uri $apiendpoint -Method Get
+} catch {
+    $errorResponse = $_.Exception.Response.GetResponseStream()
+    $reader = New-Object System.IO.StreamReader($errorResponse)
+    $reader.ReadToEnd()
+}
+```
+
+## Annex 2. PowerShell data objects
+
+### 2.1. Arrays
 
 Arrays can be put as single-line with commas or multi-line
 
@@ -340,7 +353,7 @@ PS C:\Users\Joe> $array | ConvertTo-Json
 ]
 ```
 
-### 1.2. Hash tables
+### 2.2. Hash tables
 
 A list of key-value items is represented as hash table in PowerShell
 
@@ -388,7 +401,7 @@ PS C:\Users\Joe> $hashtable | ConvertTo-Json
 }
 ```
 
-### 1.3. Nested hash tables
+### 2.3. Nested hash tables
 
 Hash tables can contain key-value, arrays, or more hash tables:
 
@@ -469,7 +482,7 @@ PS C:\Users\Joe> $nestedhashtable | ConvertTo-Json
 }
 ```
 
-### 1.4. Array of hash tables
+### 2.4. Array of hash tables
 
 Array elements can also be hash tables:
 
@@ -564,7 +577,7 @@ PS C:\Users\Joe> $arrayofhashtable | ConvertTo-Json
 ]
 ```
 
-### 1.5. Mixing different data types together
+### 2.5. Mixing different data types together
 
 ```pwsh
 $complexstructure = @(
