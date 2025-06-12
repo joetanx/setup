@@ -282,7 +282,7 @@ PS C:\Users\Joe> $array | ConvertTo-Json
 
 ### 1.2. Hash tables
 
-A list of key-value items are represented as hash table in PowerShell
+A list of key-value items is represented as hash table in PowerShell
 
 ```pwsh
 $hashtable = @{
@@ -292,7 +292,7 @@ $hashtable = @{
 }
 ```
 
-The object type is `System.Object`: `Hashtable`
+Notice that the order of the key-value is not preserved:
 
 ```pwsh
 PS C:\Users\Joe> $hashtable
@@ -302,8 +302,11 @@ Name                           Value
 key3                           3
 key1                           value 1
 key2                           value 2
+```
 
+The object type is `System.Object`: `Hashtable`
 
+```pwsh
 PS C:\Users\Joe> $hashtable.GetType()
 
 IsPublic IsSerial Name                                     BaseType
@@ -584,8 +587,6 @@ subkeyA2b                      122
 subkeyA2cArray                 {item 121, item 122, 123}
 ```
 
-Notice that `keyB4`: `24` is "flatten" up from `arrayB3` to `$complexstructure[1]`, while `value 23` is still in `arrayB3`
-
 ```pwsh
 PS C:\Users\Joe> $complexstructure[1]
 
@@ -604,11 +605,35 @@ IsPublic IsSerial Name                                     BaseType
 True     True     Hashtable                                System.Object
 ```
 
-The `arrayB3` array length is 6
+The `arrayB3` array length is 6, PowerShell "flattens" elements of array nested below the parent array upwards to the parent array:
 
 ```pwsh
 PS C:\Users\Joe> $complexstructure[1].arrayB3.Length
 6
+PS C:\Users\Joe> $complexstructure[1].arrayB3[0]
+value 23
+PS C:\Users\Joe> $complexstructure[1].arrayB3[1]
+
+Name                           Value
+----                           -----
+B3Table1Key2                   B3 table1 value 2
+B3Table1Key1                   B3 table1 value 1
+
+
+PS C:\Users\Joe> $complexstructure[1].arrayB3[2]
+
+Name                           Value
+----                           -----
+B3Table2Key2                   2322
+B3Table2Key1                   B3 table2 value 1
+
+
+PS C:\Users\Joe> $complexstructure[1].arrayB3[3]
+B3 array3 value 1
+PS C:\Users\Joe> $complexstructure[1].arrayB3[4]
+B3 array3 value 2
+PS C:\Users\Joe> $complexstructure[1].arrayB3[5]
+2333
 ```
 
 Notice that `value 23` is treated seperately from the other items:
