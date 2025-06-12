@@ -16,7 +16,7 @@ Invoke-RestMethod http://server/login -Method Post -Body $body
 
 ##### Request sent
 
-```
+```http
 POST /login HTTP/1.1
 User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
 Content-Type: application/x-www-form-urlencoded
@@ -38,7 +38,7 @@ curl -d 'username=test@example.com' -d 'password=SuperPassword'  http://server/l
 
 ##### Request sent
 
-```
+```http
 POST /login HTTP/1.1
 Host: server
 User-Agent: curl/7.76.1
@@ -66,7 +66,7 @@ Invoke-RestMethod http://server/login -Method Post -Body $body -ContentType 'app
 
 ##### Request sent
 
-```
+```http
 POST /login HTTP/1.1
 User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
 Content-Type: application/json
@@ -91,7 +91,7 @@ curl -H 'Content-Type: application/json' -d '{"username": "test@example.com", "p
 
 ##### Request sent
 
-```
+```http
 POST /login HTTP/1.1
 Host: server
 User-Agent: curl/7.76.1
@@ -126,7 +126,7 @@ Let's say an API endpoint returns a JSON response such as below:
 
 `Invoke-WebRequest` returns the response with the body under `Content`
 
-```pwsh
+```readline
 StatusCode        : 200
 StatusDescription : OK
 Content           : {"authentication": "Successful","authorization": "<access-token-...
@@ -181,7 +181,7 @@ Invoke-RestMethod http://server/resource -Headers $headers
 
 ##### Request sent
 
-```
+```http
 GET /resource HTTP/1.1
 Authorization: Bearer <access-token-jwt>
 User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
@@ -208,7 +208,7 @@ Since the server response is in JSON, cURL can be used with `jq` to get the `aut
 
 ##### Request sent
 
-```
+```http
 GET /resource HTTP/1.1
 Host: server
 User-Agent: curl/7.76.1
