@@ -1,4 +1,4 @@
-## 1. Making web request with body
+## 1. Requests with body
 
 ### 1.1. Content-Type: `application/x-www-form-urlencoded`
 
@@ -103,7 +103,7 @@ Connection: keep-alive
 {"username": "test@example.com", "password": "SuperPassword"}
 ```
 
-## 2. Making web request with multiple headers
+## 2. Requests with headers
 
 ### 2.1. Using the access token from authentication
 
@@ -174,7 +174,7 @@ The `authorization` access token can be reference by `$response.authorization` a
 
 ```pwsh
 $headers = @{
-  Authorization='Bearer '+$response.access_token
+  Authorization = 'Bearer '+$response.access_token
 }
 Invoke-RestMethod http://server/resource -Headers $headers
 ```
@@ -202,8 +202,11 @@ Since the server response is in JSON, cURL can be used with `jq` to get the `aut
 ```console
 [root@ubuntu ~]# echo $response | jq -r .authorization
 <access-token-jwt>
-[root@ubuntu ~]# headers="Authorization: Bearer $(echo $response | jq -r .authorization)"
-[root@ubuntu ~]# curl -H "$headers" http://server/resource
+```
+
+```console
+auth="Authorization: Bearer $(echo $response | jq -r .authorization)"
+curl -H "$auth" http://server/resource
 ```
 
 ##### Request sent
@@ -217,10 +220,63 @@ Authorization: Bearer <access-token-jwt>
 Connection: keep-alive
 ```
 
-### 2.2. Making web request with multiple headers
+### 2.2. Requests with multiple headers
 
-> work-in-progress
+Web requests commonly required sending multiple headers
 
+The `Content-Type` and `Authorization` headers were briefly seen above, and below are some more common examples:
+
+|Header|Example values|Purpose|
+|---|---|---|
+|Host|`example.com`|If the API endpoint is behind reverse proxies, it may require SNI (Server Name Indication)|
+|Cookie|Usually a JWT|Maintains session, usually for browser rather than API|
+|Accept-Encoding|`base64`|Indicates the type of encoding that the client can understand|
+|Authorization|Usually a JWT|Credentials for authentication|
+|Content-Type|`application/json`, `application/x-www-form-urlencoded`, `multipart/form-data`|Specifies the type of content sent by the client|
+
+#### 2.2.1. PowerShell
+
+`Invoke-WebRequest` and `Invoke-RestMethod`:
+- Supports the `-ContentType` switch to add the Content-Type to the headers of a request
+- Uses hash table as input for `-Headers` to submit each of the key-value as headers
+
+##### Request code
+
+```pwsh
+$headers = @{
+  Host = "ext.server.com"
+  Authorization = 'Bearer '+$response.access_token
+  Accept-Encoding = "base64"
+}
+Invoke-RestMethod http://server/resource -Headers $headers -ContentType 'application/json'
+```
+
+##### Request sent
+
+```http
+work-in-progress
+```
+
+#### 2.2.2. cURL
+
+To specify multiple headers with cURL, simple use `-H` (or `--header`) multiple times
+
+##### Request code
+
+```sh
+auth="Authorization: Bearer $(echo $response | jq -r .authorization)"
+curl -H 'host: ext.server.com' \
+  -H "$auth" \
+  -H 'Accept-Encoding: base64' \
+  -H 'Content-Type: application/json' \
+  http://server/resource
+```
+
+##### Request sent
+
+```http
+work-in-progress
+```
 
 
 ## 3. Uploading data
