@@ -1,229 +1,233 @@
-## 1. Example: Sophos Firewall
+## 1. Making web request with body
 
-Content-type: `application/x-www-form-urlencoded`
+### 1.1. Content-Type: `application/x-www-form-urlencoded`
 
-1. Sophos firewall uses SOAP rather than REST API → `Invoke-WebRequest` instead of `Invoke-RestMethod`
-2. `application/x-www-form-urlencoded` uses form request file upload, which is different from uploading file content to `application/json` where the file needs to be byte array and/or base64 encoded
+#### 1.1.1. PowerShell
 
-### 1.1. Invoke-WebRequest
+##### Request code
 
-Without file upload:
-
-```powershell
+```pwsh
 $body=@{
-  reqxml = Get-Content -Path request.xml -Raw
+  username = "test@example.com"
+  password = "SuperPassword"
 }
-Invoke-WebRequest -Uri "https:/sophos_firewall:4444/webconsole/APIController" -Method Post -Body $body | Select-Object -Expand Content
+Invoke-RestMethod http://server/login -Method Post -Body $body
 ```
 
-With file upload:
+##### Request sent
 
-```powershell
-$body=@{
-  reqxml = Get-Content -Path request.xml -Raw
-  file = Get-Item -Path firewall_cert.pfx
-}
-Invoke-WebRequest -Uri "https://sophos_firewall:4444/webconsole/APIController" -Method Post -Body $body | Select-Object -Expand Content
+```
+POST /login HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
+Content-Type: application/x-www-form-urlencoded
+Host: server
+Content-Length: 50
+Expect: 100-continue
+Connection: keep-alive
+
+password=SuperPassword&username=test%40example.com
 ```
 
-### 1.2. cURL
+#### 1.1.2. cURL
 
-Without file upload:
+##### Request code
 
 ```sh
-curl -k -F "reqxml=<request.xml" https://sfw.vx:4444/webconsole/APIController
-
+curl -d 'username=test@example.com' -d 'password=SuperPassword'  http://server/login
 ```
 
-With file upload:
+##### Request sent
 
-```sh
-curl -k -F "reqxml=<request.xml" -F "file=@firewall_cert.pfx" https://sfw.vx:4444/webconsole/APIController
-curl -k -F "reqxml=<request.xml" -F "file=@root_ca.pem" https://sfw.vx:4444/webconsole/APIController
-curl -k -F "reqxml=<request.xml" -F "file=@firewall_cert.pfx" -F "file=@root_ca.pem" -F "file=@intermediate_ca.pem" https://sophos_firewall:4444/webconsole/APIController
+```
+POST /login HTTP/1.1
+Host: server
+User-Agent: curl/7.76.1
+Accept: */*
+Content-Length: 48
+Content-Type: application/x-www-form-urlencoded
+Connection: keep-alive
+
+username=test@example.com&password=SuperPassword
 ```
 
-## 2. Example: Entra identity platform
+### 1.2. Content-Type: `application/json`
 
-Content-type: `application/json`
+#### 1.2.1. PowerShell
 
-### 2.1. Invoke-RestMethod
+##### Request code
 
-> [!Note]
->
-> Notice that `ConvertTo-Json` is not needed for Entra APIs
-
-Get Entra endpoints:
-
-```powershell
-$tenant = '<tenant_id>'
-$openid = Invoke-RestMethod https://login.microsoftonline.com/$tenant/v2.0/.well-known/openid-configuration
-```
-
-Authenticate to token endpoint to get access token:
-
-```powershell
-$clientid = '<application_id>'
-$clientsecret = '<application_secret>'
+```pwsh
 $body=@{
-  client_id = $clientid
-  client_secret = $clientsecret
-  grant_type = 'client_credentials'
-  scope = 'https://monitor.azure.com/.default'
-}
-$token = Invoke-RestMethod $openid.token_endpoint -Method Post -Body $body
-```
-
-### 2.2. cURL
-
->[!Note]
->
-> work in progress
-
-```sh
-
-```
-
-### 3. Example: Azure Monitor Ingestion
-
-Content-type: `application/json`
-
-### 3.1. Invoke-RestMethod
-
-> [!Note]
->
-> Notice that `ConvertTo-Json` is not needed for headers but needed for the body
-
-Place the access token into header authorization format:
-
-```powershell
-$headers = @{
-  Authorization='Bearer '+$token.access_token
-}
-```
-
-Prepare body to be uploaded:
-
-```powershell
-$body = @(
-  @{
-    Computer='gitlab'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.21'
-    HostName='gitlab'
-    ProcessID=1487
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Invalid user doesnotexist from 192.168.84.11 port 52892'
-    SourceSystem='Cribl'
-  }
-  @{
-    Computer='gitlab'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.21'
-    HostName='gitlab'
-    ProcessID=1487
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Failed password for invalid user doesnotexist from 192.168.84.11 port 52892 ssh2'
-    SourceSystem='Cribl'
-  }
-  @{
-    Computer='kube'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.22'
-    HostName='kube'
-    ProcessID=4740
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Invalid user doesnotexist from 192.168.84.11 port 52893'
-    SourceSystem='Cribl'
-  }
-  @{
-    Computer='kube'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.22'
-    HostName='kube'
-    ProcessID=4740
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Failed password for invalid user doesnotexist from 192.168.84.11 port 52893 ssh2'
-    SourceSystem='Cribl'
-  }
-) | ConvertTo-Json
-```
-
-```powershell
-$endpointuri = '<dce_uri>/dataCollectionRules/<dcr_immutable_id>/streams/<stream_name>?api-version=2023-01-01`
-Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $body -ContentType 'application/json'
-```
-
-### 3.2. cURL
-
->[!Note]
->
-> work in progress
-
-```sh
-
-```
-
-### 4. Example: CyberArk PAM API (import connection component)
-
-Content-type: `application/json`
-
-### 4.1. Invoke-RestMethod
-
-> [!Note]
->
-> Notice that `ConvertTo-Json` is not needed for headers but needed for the body
-
-Login and get PVWA token:
-
-```powershell
-$body=@{
-  "username" = "administrator"
-  "password" = "password"
+  username = "test@example.com"
+  password = "SuperPassword"
 } | ConvertTo-Json
-$token = Invoke-RestMethod https://cybr.ark.vx/PasswordVault/API/auth/Cyberark/Logon -Method Post -Body $body -ContentType 'application/json'
-$headers=@{
-  "Authorization" = $token
+Invoke-RestMethod http://server/login -Method Post -Body $body -ContentType 'application/json'
+```
+
+##### Request sent
+
+```
+POST /login HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
+Content-Type: application/json
+Host: server
+Content-Length: 76
+Expect: 100-continue
+Connection: keep-alive
+
+{
+    "password":  "SuperPassword",
+    "username":  "test@example.com"
 }
 ```
 
-The [import connection component API](https://docs.cyberark.com/pam-self-hosted/latest/en/content/webservices/importconncomponent.htm) expects the package to be in a base64 byte array, there is a rather dated but valid KB article on this: https://cyberark-customers.force.com/s/article/How-to-upload-files-using-REST-and-Powershell
+#### 1.2.2. cURL
 
-Read the file into base64 byte array:
-
-```powershell
-$file=[System.IO.File]::ReadAllBytes('<psm_cc>.zip')
-```
-
-Reference the byte array to the `ImportFile` field expected by the API:
-
-```powershell
-$body=@{ ImportFile=$file } | ConvertTo-JSON
-```
-
-Call the API:
-
-```powershell
-Invoke-RestMethod https://<pvwa>/PasswordVault/API/ConnectionComponents/Import -Method Post -Headers $headers -Body $cc -ContentType 'application/json'
-```
-
-### 4.2. cURL
-
-> [!Note]
->
-> work in progress
+##### Request code
 
 ```sh
+curl -H 'Content-Type: application/json' -d '{"username": "test@example.com", "password": "SuperPassword"}' http://server/login
+```
+
+##### Request sent
 
 ```
+POST /login HTTP/1.1
+Host: server
+User-Agent: curl/7.76.1
+Accept: */*
+Content-Type: application/json
+Content-Length: 61
+Connection: keep-alive
+
+{"username": "test@example.com", "password": "SuperPassword"}
+```
+
+## 2. Making web request with multiple headers
+
+### 2.1. Using the access token from authentication
+
+Let's say an API endpoint returns a JSON response such as below:
+
+```json
+{
+  "authentication": "Successful",
+  "authorization": "<access-token-jwt>",
+  "message": "Welcome, test@example.com"
+}
+```
+
+#### 2.1.1. PowerShell: Invoke-WebRequest vs Invoke-RestMethod
+
+> TL:DR
+> 
+> - `Invoke-WebRequest` general web request, puts response in a PowerShell object where content needs to be referenced by `$_.Content` or `| Select-Object -Expand Content`
+> - `Invoke-RestMethod` works well with JSON APIs by automatically expanding the JSON content into `PSCustomObject`
+
+`Invoke-WebRequest` returns the response with the body under `Content`
+
+```pwsh
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"authentication": "Successful","authorization": "<access-token-...
+RawContent        : HTTP/1.1 200 OK
+                    Strict-Transport-Security: max-age=31536000; includeSubDomains
+                    X-Content-Type-Options: nosniff
+                    Access-Control-Allow-Origin: *
+                    Access-Control-Allow-Methods: GET, OPTIONS
+                    x-ms-reque...
+Forms             : {}
+Headers           : {[Strict-Transport-Security, max-age=31536000; includeSubDomains], [X-Content-Type-Options, nosniff], [Access-Control-Allow-Origin, *], [Access-Control-Allow-Methods, GET, OPTIONS]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 253
+```
+
+A few more steps are required to get the `authorization` access token:
+
+```pwsh
+$response = Invoke-WebRequest http://server/login -Method Post -Body $body
+$jsonData = $response.Content | ConvertFrom-Json
+$accessToken = $jsonData.authorization
+```
+
+`InvokeRestMethod` returns the body as a `PSCustomObject`:
+
+```pwsh
+PS C:\Users\Joe> $response = Invoke-RestMethod http://server/login -Method Post -Body $body
+PS C:\Users\Joe> $response
+authentication : Successful
+authorization  : <access-token-jwt>
+message        : Welcome, test@example.com
+PS C:\Users\Joe> $response.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     False    PSCustomObject                           System.Object
+```
+
+##### Request code
+
+The `authorization` access token can be reference by `$response.authorization` and placed into header:
+
+```pwsh
+$headers = @{
+  Authorization='Bearer '+$response.access_token
+}
+Invoke-RestMethod http://server/resource -Headers $headers
+```
+
+##### Request sent
+
+```
+GET /resource HTTP/1.1
+Authorization: Bearer <access-token-jwt>
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
+Host: server
+Connection: keep-alive
+```
+
+#### 2.1.2. cURL
+
+##### Request code
+
+Since the server response is in JSON, cURL can be used with `jq` to get the `authorization` access token
+
+> [!Tip]
+>
+> `jq` returns the value with double quotes around it (e.g. `"<access-token-jwt>"`), the `-r` (or `--raw-output`) gets the value without the quotes
+
+```console
+[root@ubuntu ~]# echo $response | jq -r .authorization
+<access-token-jwt>
+[root@ubuntu ~]# headers="Authorization: Bearer $(echo $response | jq -r .authorization)"
+[root@ubuntu ~]# curl -H "$headers" http://server/resource
+```
+
+##### Request sent
+
+```
+GET /resource HTTP/1.1
+Host: server
+User-Agent: curl/7.76.1
+Accept: */*
+Authorization: Bearer <access-token-jwt>
+Connection: keep-alive
+```
+
+### 2.2. Making web request with multiple headers
+
+> work-in-progress
+
+
+
+## 3. Uploading data
+
+> work-in-progress
+
+
 
 ## Annex 0. `Invoke-WebRequest` vs `Invoke-RestMethod`
 
@@ -693,3 +697,233 @@ PS C:\Users\Joe> $complexstructure | ConvertTo-Json
     }
 ]
 ```
+
+<details><summary><header2>ARCHIVED</header2></summary>
+
+## 1. Example: Sophos Firewall
+
+Content-type: `application/x-www-form-urlencoded`
+
+1. Sophos firewall uses SOAP rather than REST API → `Invoke-WebRequest` instead of `Invoke-RestMethod`
+2. `application/x-www-form-urlencoded` uses form request file upload, which is different from uploading file content to `application/json` where the file needs to be byte array and/or base64 encoded
+
+### 1.1. Invoke-WebRequest
+
+Without file upload:
+
+```powershell
+$body=@{
+  reqxml = Get-Content -Path request.xml -Raw
+}
+Invoke-WebRequest -Uri "https:/sophos_firewall:4444/webconsole/APIController" -Method Post -Body $body | Select-Object -Expand Content
+```
+
+With file upload:
+
+```powershell
+$body=@{
+  reqxml = Get-Content -Path request.xml -Raw
+  file = Get-Item -Path firewall_cert.pfx
+}
+Invoke-WebRequest -Uri "https://sophos_firewall:4444/webconsole/APIController" -Method Post -Body $body | Select-Object -Expand Content
+```
+
+### 1.2. cURL
+
+Without file upload:
+
+```sh
+curl -k -F "reqxml=<request.xml" https://sfw.vx:4444/webconsole/APIController
+
+```
+
+With file upload:
+
+```sh
+curl -k -F "reqxml=<request.xml" -F "file=@firewall_cert.pfx" https://sfw.vx:4444/webconsole/APIController
+curl -k -F "reqxml=<request.xml" -F "file=@root_ca.pem" https://sfw.vx:4444/webconsole/APIController
+curl -k -F "reqxml=<request.xml" -F "file=@firewall_cert.pfx" -F "file=@root_ca.pem" -F "file=@intermediate_ca.pem" https://sophos_firewall:4444/webconsole/APIController
+```
+
+## 2. Example: Entra identity platform
+
+Content-type: `application/json`
+
+### 2.1. Invoke-RestMethod
+
+> [!Note]
+>
+> Notice that `ConvertTo-Json` is not needed for Entra APIs
+
+Get Entra endpoints:
+
+```powershell
+$tenant = '<tenant_id>'
+$openid = Invoke-RestMethod https://login.microsoftonline.com/$tenant/v2.0/.well-known/openid-configuration
+```
+
+Authenticate to token endpoint to get access token:
+
+```powershell
+$clientid = '<application_id>'
+$clientsecret = '<application_secret>'
+$body=@{
+  client_id = $clientid
+  client_secret = $clientsecret
+  grant_type = 'client_credentials'
+  scope = 'https://monitor.azure.com/.default'
+}
+$token = Invoke-RestMethod $openid.token_endpoint -Method Post -Body $body
+```
+
+### 2.2. cURL
+
+>[!Note]
+>
+> work in progress
+
+```sh
+
+```
+
+### 3. Example: Azure Monitor Ingestion
+
+Content-type: `application/json`
+
+### 3.1. Invoke-RestMethod
+
+> [!Note]
+>
+> Notice that `ConvertTo-Json` is not needed for headers but needed for the body
+
+Place the access token into header authorization format:
+
+```powershell
+$headers = @{
+  Authorization='Bearer '+$token.access_token
+}
+```
+
+Prepare body to be uploaded:
+
+```powershell
+$body = @(
+  @{
+    Computer='gitlab'
+    EventTime=Get-Date ([datetime]::UtcNow) -Format o
+    Facility='auth'
+    HostIP='192.168.17.21'
+    HostName='gitlab'
+    ProcessID=1487
+    ProcessName='sshd'
+    SeverityLevel='info'
+    SyslogMessage='Invalid user doesnotexist from 192.168.84.11 port 52892'
+    SourceSystem='Cribl'
+  }
+  @{
+    Computer='gitlab'
+    EventTime=Get-Date ([datetime]::UtcNow) -Format o
+    Facility='auth'
+    HostIP='192.168.17.21'
+    HostName='gitlab'
+    ProcessID=1487
+    ProcessName='sshd'
+    SeverityLevel='info'
+    SyslogMessage='Failed password for invalid user doesnotexist from 192.168.84.11 port 52892 ssh2'
+    SourceSystem='Cribl'
+  }
+  @{
+    Computer='kube'
+    EventTime=Get-Date ([datetime]::UtcNow) -Format o
+    Facility='auth'
+    HostIP='192.168.17.22'
+    HostName='kube'
+    ProcessID=4740
+    ProcessName='sshd'
+    SeverityLevel='info'
+    SyslogMessage='Invalid user doesnotexist from 192.168.84.11 port 52893'
+    SourceSystem='Cribl'
+  }
+  @{
+    Computer='kube'
+    EventTime=Get-Date ([datetime]::UtcNow) -Format o
+    Facility='auth'
+    HostIP='192.168.17.22'
+    HostName='kube'
+    ProcessID=4740
+    ProcessName='sshd'
+    SeverityLevel='info'
+    SyslogMessage='Failed password for invalid user doesnotexist from 192.168.84.11 port 52893 ssh2'
+    SourceSystem='Cribl'
+  }
+) | ConvertTo-Json
+```
+
+```powershell
+$endpointuri = '<dce_uri>/dataCollectionRules/<dcr_immutable_id>/streams/<stream_name>?api-version=2023-01-01`
+Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $body -ContentType 'application/json'
+```
+
+### 3.2. cURL
+
+>[!Note]
+>
+> work in progress
+
+```sh
+
+```
+
+### 4. Example: CyberArk PAM API (import connection component)
+
+Content-type: `application/json`
+
+### 4.1. Invoke-RestMethod
+
+> [!Note]
+>
+> Notice that `ConvertTo-Json` is not needed for headers but needed for the body
+
+Login and get PVWA token:
+
+```powershell
+$body=@{
+  "username" = "administrator"
+  "password" = "password"
+} | ConvertTo-Json
+$token = Invoke-RestMethod https://cybr.ark.vx/PasswordVault/API/auth/Cyberark/Logon -Method Post -Body $body -ContentType 'application/json'
+$headers=@{
+  "Authorization" = $token
+}
+```
+
+The [import connection component API](https://docs.cyberark.com/pam-self-hosted/latest/en/content/webservices/importconncomponent.htm) expects the package to be in a base64 byte array, there is a rather dated but valid KB article on this: https://cyberark-customers.force.com/s/article/How-to-upload-files-using-REST-and-Powershell
+
+Read the file into base64 byte array:
+
+```powershell
+$file=[System.IO.File]::ReadAllBytes('<psm_cc>.zip')
+```
+
+Reference the byte array to the `ImportFile` field expected by the API:
+
+```powershell
+$body=@{ ImportFile=$file } | ConvertTo-JSON
+```
+
+Call the API:
+
+```powershell
+Invoke-RestMethod https://<pvwa>/PasswordVault/API/ConnectionComponents/Import -Method Post -Headers $headers -Body $cc -ContentType 'application/json'
+```
+
+### 4.2. cURL
+
+> [!Note]
+>
+> work in progress
+
+```sh
+
+```
+</details>
