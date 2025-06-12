@@ -1,7 +1,3 @@
-> [!Note]
->
-> Draft - work in progress
-
 ## 1. Example: Sophos Firewall
 
 Content-type: `application/x-www-form-urlencoded`
@@ -229,11 +225,446 @@ Invoke-RestMethod https://<pvwa>/PasswordVault/API/ConnectionComponents/Import -
 
 ```
 
-## X. Additional Notes
-
-### X.1. `Invoke-WebRequest` vs `Invoke-RestMethod`
+## Annex 0. `Invoke-WebRequest` vs `Invoke-RestMethod`
 
 - `Invoke-WebRequest` general web request, puts response in a PowerShell object where content needs to be referenced by `$_.Content` or `| Select-Object -Expand Content`
 - `Invoke-RestMethod` works mostly with JSON APIs and would automatically expand a JSON response
 
-### X.2. PowerShell objects and `ConvertTo-Json`
+## Annex 1. PowerShell data objects
+
+### 1.1. Arrays
+
+Arrays can be put as single-line with commas or multi-line
+
+Single-line:
+
+```pwsh
+$array = @( 'item 1', 'item 2', 3 )
+```
+
+Multi-line:
+
+```pwsh
+$array = @(
+  'item 1'
+  'item 2'
+  3
+)
+```
+
+The object type is `System.Array`: `Object[]`
+
+```pwsh
+PS C:\Users\Joe> $array
+item 1
+item 2
+3
+PS C:\Users\Joe> $array.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+```
+
+JSON representation:
+
+```pwsh
+PS C:\Users\Joe> $array | ConvertTo-Json
+```
+
+```json
+[
+    "item 1",
+    "item 2",
+    3
+]
+```
+
+### 1.2. Hash tables
+
+A list of key-value items are represented as hash table in PowerShell
+
+```pwsh
+$hashtable = @{
+  key1 = 'value 1'
+  key2 = 'value 2'
+  key3 = 3
+}
+```
+
+The object type is `System.Object`: `Hashtable`
+
+```pwsh
+PS C:\Users\Joe> $hashtable
+
+Name                           Value
+----                           -----
+key3                           3
+key1                           value 1
+key2                           value 2
+
+
+PS C:\Users\Joe> $hashtable.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+```
+
+JSON representation:
+
+```pwsh
+PS C:\Users\Joe> $hashtable | ConvertTo-Json
+```
+
+```json
+{
+    "key3":  3,
+    "key1":  "value 1",
+    "key2":  "value 2"
+}
+```
+
+### 1.3. Nested hash tables
+
+Hash tables can contain key-value, arrays, or more hash tables:
+
+```pwsh
+$nestedhashtable = @{
+  key1 = 'value 1'
+  object2 = @{
+    subkey2a = 'value 2a'
+    subkey2b = 'value 2b'
+    subkey2c = 3
+  }
+  array3 = @( 'item 1', 'item 2', 3 )
+}
+```
+
+The parent object type is `System.Object`: `Hashtable`
+
+```pwsh
+PS C:\Users\Joe> $nestedhashtable
+
+Name                           Value
+----                           -----
+key1                           value 1
+object2                        {subkey2c, subkey2a, subkey2b}
+array3                         {item 1, item 2, 3}
+
+
+PS C:\Users\Joe> $nestedhashtable.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+```
+
+Individual nested objects have the respective data types:
+
+```pwsh
+PS C:\Users\Joe> $nestedhashtable.key1.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $nestedhashtable.object2.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+
+
+PS C:\Users\Joe> $nestedhashtable.array3.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+```
+
+JSON representation:
+
+```pwsh
+PS C:\Users\Joe> $nestedhashtable | ConvertTo-Json
+```
+
+```json
+{
+    "key1":  "value 1",
+    "object2":  {
+                    "subkey2c":  3,
+                    "subkey2a":  "value 2a",
+                    "subkey2b":  "value 2b"
+                },
+    "array3":  [
+                   "item 1",
+                   "item 2",
+                   3
+               ]
+}
+```
+
+### 1.4. Array of hash tables
+
+Array elements can also be hash tables:
+
+```pwsh
+$arrayofhashtable = @(
+  @{
+    keyA1 = 'value A1'
+    keyA2 = 'value A2'
+    keyA3 = 13
+  }
+  @{
+    keyB1 = 'value B1'
+    keyB2 = 'value B2'
+    keyB3 = 23
+  }
+)
+```
+
+```pwsh
+PS C:\Users\Joe> $arrayofhashtable
+
+Name                           Value
+----                           -----
+keyA2                          value A2
+keyA1                          value A1
+keyA3                          13
+keyB3                          23
+keyB1                          value B1
+keyB2                          value B2
+
+
+PS C:\Users\Joe> $arrayofhashtable.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+```
+
+Each element can be referenced with `[#]` and has the respective data types:
+
+```pwsh
+PS C:\Users\Joe> $arrayofhashtable[0]
+
+Name                           Value
+----                           -----
+keyA2                          value A2
+keyA1                          value A1
+keyA3                          13
+
+
+PS C:\Users\Joe> $arrayofhashtable[0].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+
+
+PS C:\Users\Joe> $arrayofhashtable[1]
+
+Name                           Value
+----                           -----
+keyB3                          23
+keyB1                          value B1
+keyB2                          value B2
+
+
+PS C:\Users\Joe> $arrayofhashtable[1].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+```
+
+JSON representation:
+
+```pwsh
+PS C:\Users\Joe> $arrayofhashtable | ConvertTo-Json
+```
+
+```json
+[
+    {
+        "keyA2":  "value A2",
+        "keyA1":  "value A1",
+        "keyA3":  13
+    },
+    {
+        "keyB3":  23,
+        "keyB1":  "value B1",
+        "keyB2":  "value B2"
+    }
+]
+```
+
+### 1.5. Mixing different data types together
+
+```pwsh
+$complexstructure = @(
+  @{
+    keyA1 = 'value A1'
+    objectA2 = @{
+      subkeyA2a = 'value A2a'
+      subkeyA2b = 122
+      subkeyA2cArray = @( 'item 121', 'item 122', 123 )
+    }
+    arrayA3 =  @( 'item 131', 'item 132', 133 )
+  }
+  @{
+    keyB1 = 'value B1'
+    ArrayB2 = @( 'item221', 'item222', 223 )
+    ArrayB3 = @(
+      'value 23'
+      @{
+        B3Table1Key1 = 'B3 table1 value 1'
+        B3Table1Key2 = 'B3 table1 value 2'
+      }
+      @{
+        B3Table2Key1 = 'B3 table2 value 1'
+        B3Table2Key2 = 2322
+      }
+      @( 'B3 array3 value 1', 'B3 array3 value 2', 2333 )
+    )
+    keyB4 = 24
+  }
+)
+```
+
+```pwsh
+PS C:\Users\Joe> $complexstructure
+
+Name                           Value
+----                           -----
+objectA2                       {subkeyA2a, subkeyA2b, subkeyA2cArray}
+keyA1                          value A1
+arrayA3                        {item 131, item 132, 133}
+arrayB3                        {value 23, System.Collections.Hashtable, System.Collections.Hashtable, B3 array3 value 1...}
+keyB1                          value B1
+keyB4                          24
+arrayB2                        {item221, item222, 223}
+
+
+
+PS C:\Users\Joe> $complexstructure.Length
+2
+PS C:\Users\Joe> $complexstructure.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+```
+
+```pwsh
+PS C:\Users\Joe> $complexstructure[0]
+
+Name                           Value
+----                           -----
+objectA2                       {subkeyA2a, subkeyA2b, subkeyA2cArray}
+keyA1                          value A1
+arrayA3                        {item 131, item 132, 133}
+
+
+PS C:\Users\Joe> $complexstructure[0].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+
+
+PS C:\Users\Joe> $complexstructure[0].objectA2
+
+Name                           Value
+----                           -----
+subkeyA2a                      value A2a
+subkeyA2b                      122
+subkeyA2cArray                 {item 121, item 122, 123}
+```
+
+Notice that `keyB4`: `24` is "flatten" up from `arrayB3` to `$complexstructure[1]`, while `value 23` is still in `arrayB3`
+
+```pwsh
+PS C:\Users\Joe> $complexstructure[1]
+
+Name                           Value
+----                           -----
+ArrayB3                        {value 23, System.Collections.Hashtable, System.Collections.Hashtable, B3 array3 value 1...}
+keyB1                          value B1
+keyB4                          24
+ArrayB2                        {item221, item222, 223}
+
+
+PS C:\Users\Joe> $complexstructure[1].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+```
+
+The `arrayB3` array length is 6
+
+```pwsh
+PS C:\Users\Joe> $complexstructure[1].arrayB3.Length
+6
+```
+
+Notice that `value 23` is treated seperately from the other items:
+
+```pwsh
+PS C:\Users\Joe> $complexstructure[1].arrayB3
+value 23
+
+Name                           Value
+----                           -----
+B3Table1Key2                   B3 table1 value 2
+B3Table1Key1                   B3 table1 value 1
+B3Table2Key2                   2322
+B3Table2Key1                   B3 table2 value 1
+B3 array3 value 1
+B3 array3 value 2
+2333
+```
+
+JSON representation:
+
+```pwsh
+PS C:\Users\Joe> $complexstructure | ConvertTo-Json
+```
+
+```json
+[
+    {
+        "objectA2":  {
+                         "subkeyA2a":  "value A2a",
+                         "subkeyA2b":  122,
+                         "subkeyA2cArray":  "item 121 item 122 123"
+                     },
+        "keyA1":  "value A1",
+        "arrayA3":  [
+                        "item 131",
+                        "item 132",
+                        133
+                    ]
+    },
+    {
+        "arrayB3":  [
+                        "value 23",
+                        "System.Collections.Hashtable",
+                        "System.Collections.Hashtable",
+                        "B3 array3 value 1",
+                        "B3 array3 value 2",
+                        2333
+                    ],
+        "keyB1":  "value B1",
+        "keyB4":  24,
+        "arrayB2":  [
+                        "item221",
+                        "item222",
+                        223
+                    ]
+    }
+]
+```
