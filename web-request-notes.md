@@ -174,7 +174,7 @@ The `authorization` access token can be referenced by `$response.authorization` 
 
 ```pwsh
 $headers = @{
-  Authorization = 'Bearer '+$response.access_token
+  Authorization = 'Bearer '+$response.authorization
 }
 Invoke-RestMethod http://server/resource -Headers $headers
 ```
@@ -244,9 +244,9 @@ The `Content-Type` and `Authorization` headers were briefly seen above, and belo
 
 ```pwsh
 $headers = @{
-  Host = "ext.server.com"
-  Authorization = 'Bearer '+$response.access_token
-  Accept-Encoding = "base64"
+  Host = 'ext.server.com'
+  Authorization = 'Bearer '+$response.authorization
+  'Accept-Encoding' = 'base64'
 }
 Invoke-RestMethod http://server/resource -Headers $headers -ContentType 'application/json'
 ```
@@ -254,7 +254,13 @@ Invoke-RestMethod http://server/resource -Headers $headers -ContentType 'applica
 ##### Request sent
 
 ```http
-work-in-progress
+GET /resource HTTP/1.1
+Authorization: Bearer <access-token-jwt>
+Accept-Encoding: gzip, deflate, br
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
+Content-Type: application/json
+Host: ext.server.com
+Connection: keep-alive
 ```
 
 #### 2.2.2. cURL
@@ -275,15 +281,232 @@ curl -H 'host: ext.server.com' \
 ##### Request sent
 
 ```http
-work-in-progress
+GET /resource HTTP/1.1
+Host: ext.server.com
+User-Agent: curl/7.76.1
+Accept: */*
+Authorization: Bearer <access-token-jwt>
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json
+Connection: keep-alive
 ```
-
 
 ## 3. Uploading data
 
-> work-in-progress
+### 3.1. Content-Type: `application/x-www-form-urlencoded` or `multipart/form-data`
+
+Usually for non REST (JSON) APIs such as SOAP API or just API endpoints that take form based input
+
+Let's say an API endpoints takes in:
+1. a zip package upload
+2. a xml manifest in the `reqxml` parameter such as below:
+
+```xml
+<Request Version="2025-06-01">
+<Notification>
+    <To>Security Administrator</to>
+    <From>Security Alerts</from>
+    <Message>This is a test alert</message>
+</Notification>
+```
+
+#### 3.1.1. PowerShell
+
+1. `Get-Content` is used to read `test.xml` and the `-Raw` option gets the content as one string, instead of an array of strings
+2. `Get-Item` gets the `FileInfo` of the specified file
+
+```pwsh
+PS C:\Users\Joe> $reqxml = Get-Content test.xml -Raw
+PS C:\Users\Joe> $reqxml
+<Request Version="2025-06-01">
+<Notification>
+    <To>Security Administrator</to>
+    <From>Security Alerts</from>
+    <Message>This is a test alert</message>
+</Notification>
+PS C:\Users\Rimuru> $reqxml.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+```
+
+```pwsh
+PS C:\Users\Joe> $file = Get-Item test.zip
+PS C:\Users\Joe> $file
 
 
+    Directory: C:\Users\Joe
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----       13 Jun 2025     07:39            317 test.zip
+
+
+PS C:\Users\Joe> $file.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     FileInfo                                 System.IO.FileSystemInfo
+```
+
+##### Request code
+
+```pwsh
+$body=@{
+  reqxml = Get-Content test.xml -Raw
+  file = Get-Item test.zip
+}
+```
+
+```pwsh
+PS C:\Users\Joe> $body
+
+Name                           Value
+----                           -----
+reqxml                         <Request Version="2025-06-01">...
+file                           C:\Users\Rimuru\test.zip
+```
+
+```pwsh
+Invoke-WebRequest http://server/request -Method Post -Body $body
+```
+
+##### Request sent
+
+Notice that `Invoke-WebRequest` sends the request as `application/x-www-form-urlencoded`
+
+A new option `-Form` is added in PowerShell 6.1.0, which converts a dictionary to a `multipart/form-data` submission
+
+(https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest#-form)
+
+```http
+POST /request HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
+Content-Type: application/x-www-form-urlencoded
+Host: server
+Content-Length: 294
+Connection: keep-alive
+
+reqxml=%3CRequest+Version%3D%222025-06-01%22%3E%0D%0A%3CNotification%3E%0D%0A++++%3CTo%3ESecurity+Administrator%3C%2Fto%3E%0D%0A++++%3CFrom%3ESecurity+Alerts%3C%2Ffrom%3E%0D%0A++++%3CMessage%3EThis+is+a+test+alert%3C%2Fmessage%3E%0D%0A%3C%2FNotification%3E&file=C%3A%5CUsers%5CJoe%5Ctest.zip
+```
+
+#### 3.1.2. cURL
+
+cURL takes the multiple `-F` (or `--form`) options and submit the request as `multipart/form-data`
+- `<` gets the content of the specified file
+- `@` attaches the specified file in the post as a file upload
+
+##### Request code
+
+```sh
+curl -F 'reqxml=<test.xml' -F 'file=@test.zip' http://server/request
+```
+
+##### Request sent
+
+```http
+POST /request HTTP/1.1
+Host: server
+User-Agent: curl/7.76.1
+Accept: */*
+Content-Length: 822
+Content-Type: multipart/form-data; boundary=------------------------cfdf478cc99d2515
+Connection: keep-alive
+
+--------------------------cfdf478cc99d2515
+Content-Disposition: form-data; name="reqxml"
+Content-Type: application/xml
+
+<Request Version="2025-06-01">
+<Notification>
+    <To>Security Administrator</to>
+    <From>Security Alerts</from>
+    <Message>This is a test alert</message>
+</Notification>
+--------------------------cfdf478cc99d2515
+Content-Disposition: form-data; name="file"; filename="test.zip"
+Content-Type: application/octet-stream
+
+<chunk of the test.zip file>
+--------------------------cfdf478cc99d2515--
+```
+
+### 3.2. Content-Type: `application/json`
+
+REST (JSON) APIs usually accepts a file as a base-64 encoded string to a parameter rather than the file upload method above
+
+This simplifies the API communication, but would increase content length submitted as base-64 encoding adds about 33% more data
+
+Let's say an API endpoint accepts a file in the `ImportFile` field
+
+#### 3.2.1. PowerShell
+
+A few commands are needed to convert the file to base-64 encoded string and place into JSON in PowerShell:
+1. Read the file with `[System.IO.File]::ReadAllBytes('<file>')`
+2. Convert to base-64 with `[Convert]::ToBase64String(<byte-array-from-ReadAllBytes>)`
+3. Piping PowerShell object to `ConvertTo-JSON`
+
+```pwsh
+$body=@{ ImportFile = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes('test.zip')) } | ConvertTo-JSON
+```
+
+##### Request code
+
+```pwsh
+Invoke-RestMethod http://server -Method Post -Body $body -ContentType 'application/json'
+```
+
+##### Request sent
+
+```http
+POST /request HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
+Content-Type: application/json
+Host: server
+Content-Length: 451
+Connection: keep-alive
+
+{
+    "ImportFile":  "UEsDBBQACAAIAPU8zVoAAAAAAAAAAAAAAAAIACAAdGVzdC54bWx1eAsAAQQAAAAABAAAAABVVA0ABz5lS2g+ZUtoMGVLaFWOMQvCQAyFd8H/cHQvVws6xQOXbjpocT9qqgGvwSQd/PfeQQV9ZHl53/DBGV8zqrkrihJP+6pt2m3d7OpmU4X1Ck5sNNIQLY+5uxzoOVxwmIXs7Q63RBOpSTQW8MZfqBNOP9gTxRT8WL4LcUTVeMfQP0hdvuismMSCgk/Lmh38n8QHUEsHCIDzjICDAAAAswAAAFBLAQIUAxQACAAIAPU8zVqA84yAgwAAALMAAAAIABgAAAAAAAAAAAC2gQAAAAB0ZXN0LnhtbHV4CwABBAAAAAAEAAAAAFVUBQABPmVLaFBLBQYAAAAAAQABAE4AAADZAAAAAAA="
+}
+```
+
+#### 3.2.2. cURL
+
+Linux can just use the `base64` command to convert the file to base-64 encoded string
+
+```sh
+base64 -w 0 <file>
+```
+
+> [!Tip]
+>
+> `base64` line wraps the output [after 76 characters by default](https://linux.die.net/man/1/base64)
+> 
+> The `-w 0` option disables line wrapping
+
+##### Request code
+
+```sh
+body="{\"ImportFile\": \"$(base64 -w 0 test.zip)\"}"
+curl -X POST -H 'Content-Type: application/json' -d "$body" http://server/request
+```
+
+##### Request sent
+
+```http
+POST /request HTTP/1.1
+Host: server
+User-Agent: curl/7.76.1
+Accept: */*
+Content-Type: application/json
+Content-Length: 442
+Connection: keep-alive
+
+{"ImportFile": "UEsDBBQACAAIAPU8zVoAAAAAAAAAAAAAAAAIACAAdGVzdC54bWx1eAsAAQQAAAAABAAAAABVVA0ABz5lS2g+ZUtoMGVLaFWOMQvCQAyFd8H/cHQvVws6xQOXbjpocT9qqgGvwSQd/PfeQQV9ZHl53/DBGV8zqrkrihJP+6pt2m3d7OpmU4X1Ck5sNNIQLY+5uxzoOVxwmIXs7Q63RBOpSTQW8MZfqBNOP9gTxRT8WL4LcUTVeMfQP0hdvuismMSCgk/Lmh38n8QHUEsHCIDzjICDAAAAswAAAFBLAQIUAxQACAAIAPU8zVqA84yAgwAAALMAAAAIABgAAAAAAAAAAAC2gQAAAAB0ZXN0LnhtbHV4CwABBAAAAAAEAAAAAFVUBQABPmVLaFBLBQYAAAAAAQABAE4AAADZAAAAAAA="}
+```
 
 ## Annex 1. Getting response content for HTTP errors
 
@@ -766,233 +989,3 @@ PS C:\Users\Joe> $complexstructure | ConvertTo-Json
     }
 ]
 ```
-
-<details><summary><header2>ARCHIVED</header2></summary>
-
-## 1. Example: Sophos Firewall
-
-Content-type: `application/x-www-form-urlencoded`
-
-1. Sophos firewall uses SOAP rather than REST API → `Invoke-WebRequest` instead of `Invoke-RestMethod`
-2. `application/x-www-form-urlencoded` uses form request file upload, which is different from uploading file content to `application/json` where the file needs to be byte array and/or base64 encoded
-
-### 1.1. Invoke-WebRequest
-
-Without file upload:
-
-```powershell
-$body=@{
-  reqxml = Get-Content -Path request.xml -Raw
-}
-Invoke-WebRequest -Uri "https:/sophos_firewall:4444/webconsole/APIController" -Method Post -Body $body | Select-Object -Expand Content
-```
-
-With file upload:
-
-```powershell
-$body=@{
-  reqxml = Get-Content -Path request.xml -Raw
-  file = Get-Item -Path firewall_cert.pfx
-}
-Invoke-WebRequest -Uri "https://sophos_firewall:4444/webconsole/APIController" -Method Post -Body $body | Select-Object -Expand Content
-```
-
-### 1.2. cURL
-
-Without file upload:
-
-```sh
-curl -k -F "reqxml=<request.xml" https://sfw.vx:4444/webconsole/APIController
-
-```
-
-With file upload:
-
-```sh
-curl -k -F "reqxml=<request.xml" -F "file=@firewall_cert.pfx" https://sfw.vx:4444/webconsole/APIController
-curl -k -F "reqxml=<request.xml" -F "file=@root_ca.pem" https://sfw.vx:4444/webconsole/APIController
-curl -k -F "reqxml=<request.xml" -F "file=@firewall_cert.pfx" -F "file=@root_ca.pem" -F "file=@intermediate_ca.pem" https://sophos_firewall:4444/webconsole/APIController
-```
-
-## 2. Example: Entra identity platform
-
-Content-type: `application/json`
-
-### 2.1. Invoke-RestMethod
-
-> [!Note]
->
-> Notice that `ConvertTo-Json` is not needed for Entra APIs
-
-Get Entra endpoints:
-
-```powershell
-$tenant = '<tenant_id>'
-$openid = Invoke-RestMethod https://login.microsoftonline.com/$tenant/v2.0/.well-known/openid-configuration
-```
-
-Authenticate to token endpoint to get access token:
-
-```powershell
-$clientid = '<application_id>'
-$clientsecret = '<application_secret>'
-$body=@{
-  client_id = $clientid
-  client_secret = $clientsecret
-  grant_type = 'client_credentials'
-  scope = 'https://monitor.azure.com/.default'
-}
-$token = Invoke-RestMethod $openid.token_endpoint -Method Post -Body $body
-```
-
-### 2.2. cURL
-
->[!Note]
->
-> work in progress
-
-```sh
-
-```
-
-### 3. Example: Azure Monitor Ingestion
-
-Content-type: `application/json`
-
-### 3.1. Invoke-RestMethod
-
-> [!Note]
->
-> Notice that `ConvertTo-Json` is not needed for headers but needed for the body
-
-Place the access token into header authorization format:
-
-```powershell
-$headers = @{
-  Authorization='Bearer '+$token.access_token
-}
-```
-
-Prepare body to be uploaded:
-
-```powershell
-$body = @(
-  @{
-    Computer='gitlab'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.21'
-    HostName='gitlab'
-    ProcessID=1487
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Invalid user doesnotexist from 192.168.84.11 port 52892'
-    SourceSystem='Cribl'
-  }
-  @{
-    Computer='gitlab'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.21'
-    HostName='gitlab'
-    ProcessID=1487
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Failed password for invalid user doesnotexist from 192.168.84.11 port 52892 ssh2'
-    SourceSystem='Cribl'
-  }
-  @{
-    Computer='kube'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.22'
-    HostName='kube'
-    ProcessID=4740
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Invalid user doesnotexist from 192.168.84.11 port 52893'
-    SourceSystem='Cribl'
-  }
-  @{
-    Computer='kube'
-    EventTime=Get-Date ([datetime]::UtcNow) -Format o
-    Facility='auth'
-    HostIP='192.168.17.22'
-    HostName='kube'
-    ProcessID=4740
-    ProcessName='sshd'
-    SeverityLevel='info'
-    SyslogMessage='Failed password for invalid user doesnotexist from 192.168.84.11 port 52893 ssh2'
-    SourceSystem='Cribl'
-  }
-) | ConvertTo-Json
-```
-
-```powershell
-$endpointuri = '<dce_uri>/dataCollectionRules/<dcr_immutable_id>/streams/<stream_name>?api-version=2023-01-01`
-Invoke-RestMethod $endpointuri -Method Post -Headers $headers -Body $body -ContentType 'application/json'
-```
-
-### 3.2. cURL
-
->[!Note]
->
-> work in progress
-
-```sh
-
-```
-
-### 4. Example: CyberArk PAM API (import connection component)
-
-Content-type: `application/json`
-
-### 4.1. Invoke-RestMethod
-
-> [!Note]
->
-> Notice that `ConvertTo-Json` is not needed for headers but needed for the body
-
-Login and get PVWA token:
-
-```powershell
-$body=@{
-  "username" = "administrator"
-  "password" = "password"
-} | ConvertTo-Json
-$token = Invoke-RestMethod https://cybr.ark.vx/PasswordVault/API/auth/Cyberark/Logon -Method Post -Body $body -ContentType 'application/json'
-$headers=@{
-  "Authorization" = $token
-}
-```
-
-The [import connection component API](https://docs.cyberark.com/pam-self-hosted/latest/en/content/webservices/importconncomponent.htm) expects the package to be in a base64 byte array, there is a rather dated but valid KB article on this: https://cyberark-customers.force.com/s/article/How-to-upload-files-using-REST-and-Powershell
-
-Read the file into base64 byte array:
-
-```powershell
-$file=[System.IO.File]::ReadAllBytes('<psm_cc>.zip')
-```
-
-Reference the byte array to the `ImportFile` field expected by the API:
-
-```powershell
-$body=@{ ImportFile=$file } | ConvertTo-JSON
-```
-
-Call the API:
-
-```powershell
-Invoke-RestMethod https://<pvwa>/PasswordVault/API/ConnectionComponents/Import -Method Post -Headers $headers -Body $cc -ContentType 'application/json'
-```
-
-### 4.2. cURL
-
-> [!Note]
->
-> work in progress
-
-```sh
-
-```
-</details>
