@@ -182,11 +182,18 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 >
 > The CA certificate chain configured would be used to validate client certificates
 
-![image](https://github.com/user-attachments/assets/b9198c44-1953-44c3-ba7e-4514d5c71a7f)
+![image](https://github.com/user-attachments/assets/0d47d354-f969-491c-aa70-32d2379044fb)
 
 ##### Configure subscription and the logs to collect
 
-![image](https://github.com/user-attachments/assets/d356c23c-9067-4058-a39d-79f74880431d)
+Example:
+- Security
+- Windows Powershell
+- Microsoft-Windows-PowerShell/Operational
+- Microsoft-Windows-Sysmon/Operational
+- Microsoft-Windows-WinRM/Operational
+
+![image](https://github.com/user-attachments/assets/a802a179-8e81-425c-b562-2b12da287ef7)
 
 > [!Tip]
 >
