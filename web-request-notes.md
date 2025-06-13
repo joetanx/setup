@@ -303,11 +303,12 @@ Let's say an API endpoints takes in:
 
 ```xml
 <Request Version="2025-06-01">
-<Notification>
-    <To>Security Administrator</to>
-    <From>Security Alerts</from>
-    <Message>This is a test alert</message>
-</Notification>
+  <Notification>
+    <To>Security Administrator</To>
+    <From>Security Alerts</From>
+    <Message>This is a test alert</Message>
+  </Notification>
+</Request>
 ```
 
 #### 3.1.1. PowerShell
@@ -319,11 +320,12 @@ Let's say an API endpoints takes in:
 PS C:\Users\Joe> $reqxml = Get-Content test.xml -Raw
 PS C:\Users\Joe> $reqxml
 <Request Version="2025-06-01">
-<Notification>
-    <To>Security Administrator</to>
-    <From>Security Alerts</from>
-    <Message>This is a test alert</message>
-</Notification>
+  <Notification>
+    <To>Security Administrator</To>
+    <From>Security Alerts</From>
+    <Message>This is a test alert</Message>
+  </Notification>
+</Request>
 PS C:\Users\Rimuru> $reqxml.GetType()
 
 IsPublic IsSerial Name                                     BaseType
@@ -386,10 +388,11 @@ POST /request HTTP/1.1
 User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
 Content-Type: application/x-www-form-urlencoded
 Host: server
-Content-Length: 294
+Content-Length: 317
+Expect: 100-continue
 Connection: keep-alive
 
-reqxml=%3CRequest+Version%3D%222025-06-01%22%3E%0D%0A%3CNotification%3E%0D%0A++++%3CTo%3ESecurity+Administrator%3C%2Fto%3E%0D%0A++++%3CFrom%3ESecurity+Alerts%3C%2Ffrom%3E%0D%0A++++%3CMessage%3EThis+is+a+test+alert%3C%2Fmessage%3E%0D%0A%3C%2FNotification%3E&file=C%3A%5CUsers%5CJoe%5Ctest.zip
+reqxml=%3CRequest+Version%3D%222025-06-01%22%3E%0D%0A++%3CNotification%3E%0D%0A++++%3CTo%3ESecurity+Administrator%3C%2FTo%3E%0D%0A++++%3CFrom%3ESecurity+Alerts%3C%2FFrom%3E%0D%0A++++%3CMessage%3EThis+is+a+test+alert%3C%2FMessage%3E%0D%0A++%3C%2FNotification%3E%0D%0A%3C%2FRequest%3E&file=C%3A%5CUsers%5CJoe%5Ctest.zip
 ```
 
 #### 3.1.2. cURL
@@ -411,26 +414,28 @@ POST /request HTTP/1.1
 Host: server
 User-Agent: curl/7.76.1
 Accept: */*
-Content-Length: 822
-Content-Type: multipart/form-data; boundary=------------------------cfdf478cc99d2515
+Content-Length: 835
+Content-Type: multipart/form-data; boundary=------------------------15fe14fd6d40dea9
 Connection: keep-alive
 
---------------------------cfdf478cc99d2515
+--------------------------15fe14fd6d40dea9
 Content-Disposition: form-data; name="reqxml"
 Content-Type: application/xml
 
 <Request Version="2025-06-01">
-<Notification>
-    <To>Security Administrator</to>
-    <From>Security Alerts</from>
-    <Message>This is a test alert</message>
-</Notification>
---------------------------cfdf478cc99d2515
+  <Notification>
+    <To>Security Administrator</To>
+    <From>Security Alerts</From>
+    <Message>This is a test alert</Message>
+  </Notification>
+</Request>
+
+--------------------------15fe14fd6d40dea9
 Content-Disposition: form-data; name="file"; filename="test.zip"
 Content-Type: application/octet-stream
 
 <chunk of the test.zip file>
---------------------------cfdf478cc99d2515--
+--------------------------15fe14fd6d40dea9--
 ```
 
 ### 3.2. Content-Type: `application/json`
@@ -455,7 +460,7 @@ $body=@{ ImportFile = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes('
 ##### Request code
 
 ```pwsh
-Invoke-RestMethod http://server -Method Post -Body $body -ContentType 'application/json'
+Invoke-RestMethod http://server/request -Method Post -Body $body -ContentType 'application/json'
 ```
 
 ##### Request sent
@@ -465,11 +470,12 @@ POST /request HTTP/1.1
 User-Agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.3624
 Content-Type: application/json
 Host: server
-Content-Length: 451
+Content-Length: 455
+Expect: 100-continue
 Connection: keep-alive
 
 {
-    "ImportFile":  "UEsDBBQACAAIAPU8zVoAAAAAAAAAAAAAAAAIACAAdGVzdC54bWx1eAsAAQQAAAAABAAAAABVVA0ABz5lS2g+ZUtoMGVLaFWOMQvCQAyFd8H/cHQvVws6xQOXbjpocT9qqgGvwSQd/PfeQQV9ZHl53/DBGV8zqrkrihJP+6pt2m3d7OpmU4X1Ck5sNNIQLY+5uxzoOVxwmIXs7Q63RBOpSTQW8MZfqBNOP9gTxRT8WL4LcUTVeMfQP0hdvuismMSCgk/Lmh38n8QHUEsHCIDzjICDAAAAswAAAFBLAQIUAxQACAAIAPU8zVqA84yAgwAAALMAAAAIABgAAAAAAAAAAAC2gQAAAAB0ZXN0LnhtbHV4CwABBAAAAAAEAAAAAFVUBQABPmVLaFBLBQYAAAAAAQABAE4AAADZAAAAAAA="
+    "ImportFile":  "UEsDBBQACAAIAJdCzVoAAAAAAAAAAAAAAAAIACAAdGVzdC54bWx1eAsAAQQAAAAABAAAAABVVA0AB95uS2jebkto1m5LaF2OsQrCQBAFe8F/WNKHiwGt1gMbOy002B9x1QWTw91N4d97OU4Q4VXzphg80WsiNbiQKMdxW7VNu66bTd2sKr9cAOAxGt+4D5buTBLroj9TPwnbG3bXgUdWk2BR0KWrSHuJw4/2JDFFl2kxDqQa7uS7ByukBbC5Jcwquu+bK9xfBrpS7j9QSwcIgcIdq4UAAADDAAAAUEsBAhQDFAAIAAgAl0LNWoHCHauFAAAAwwAAAAgAGAAAAAAAAAAAALaBAAAAAHRlc3QueG1sdXgLAAEEAAAAAAQAAAAAVVQFAAHebktoUEsFBgAAAAABAAEATgAAANsAAAAAAA=="
 }
 ```
 
@@ -502,10 +508,10 @@ Host: server
 User-Agent: curl/7.76.1
 Accept: */*
 Content-Type: application/json
-Content-Length: 442
+Content-Length: 446
 Connection: keep-alive
 
-{"ImportFile": "UEsDBBQACAAIAPU8zVoAAAAAAAAAAAAAAAAIACAAdGVzdC54bWx1eAsAAQQAAAAABAAAAABVVA0ABz5lS2g+ZUtoMGVLaFWOMQvCQAyFd8H/cHQvVws6xQOXbjpocT9qqgGvwSQd/PfeQQV9ZHl53/DBGV8zqrkrihJP+6pt2m3d7OpmU4X1Ck5sNNIQLY+5uxzoOVxwmIXs7Q63RBOpSTQW8MZfqBNOP9gTxRT8WL4LcUTVeMfQP0hdvuismMSCgk/Lmh38n8QHUEsHCIDzjICDAAAAswAAAFBLAQIUAxQACAAIAPU8zVqA84yAgwAAALMAAAAIABgAAAAAAAAAAAC2gQAAAAB0ZXN0LnhtbHV4CwABBAAAAAAEAAAAAFVUBQABPmVLaFBLBQYAAAAAAQABAE4AAADZAAAAAAA="}
+{"ImportFile": "UEsDBBQACAAIAJdCzVoAAAAAAAAAAAAAAAAIACAAdGVzdC54bWx1eAsAAQQAAAAABAAAAABVVA0AB95uS2jebkto1m5LaF2OsQrCQBAFe8F/WNKHiwGt1gMbOy002B9x1QWTw91N4d97OU4Q4VXzphg80WsiNbiQKMdxW7VNu66bTd2sKr9cAOAxGt+4D5buTBLroj9TPwnbG3bXgUdWk2BR0KWrSHuJw4/2JDFFl2kxDqQa7uS7ByukBbC5Jcwquu+bK9xfBrpS7j9QSwcIgcIdq4UAAADDAAAAUEsBAhQDFAAIAAgAl0LNWoHCHauFAAAAwwAAAAgAGAAAAAAAAAAAALaBAAAAAHRlc3QueG1sdXgLAAEEAAAAAAQAAAAAVVQFAAHebktoUEsFBgAAAAABAAEATgAAANsAAAAAAA=="}
 ```
 
 ## Annex 1. Getting response content for HTTP errors
