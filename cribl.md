@@ -188,12 +188,12 @@ Start a capture in `Live Data` tab of the data source and see if events are comi
 
 Example:
 - Security
-- Windows Powershell
+- Windows PowerShell
 - Microsoft-Windows-PowerShell/Operational
 - Microsoft-Windows-Sysmon/Operational
 - Microsoft-Windows-WinRM/Operational
 
-![image](https://github.com/user-attachments/assets/a802a179-8e81-425c-b562-2b12da287ef7)
+![image](https://github.com/user-attachments/assets/2fd75279-8a31-45a2-87e4-be871722d531)
 
 > [!Tip]
 >
