@@ -326,7 +326,7 @@ PS C:\Users\Joe> $reqxml
     <Message>This is a test alert</Message>
   </Notification>
 </Request>
-PS C:\Users\Rimuru> $reqxml.GetType()
+PS C:\Users\Joe> $reqxml.GetType()
 
 IsPublic IsSerial Name                                     BaseType
 -------- -------- ----                                     --------
@@ -368,7 +368,7 @@ PS C:\Users\Joe> $body
 Name                           Value
 ----                           -----
 reqxml                         <Request Version="2025-06-01">...
-file                           C:\Users\Rimuru\test.zip
+file                           C:\Users\Joe\test.zip
 ```
 
 ```pwsh
@@ -995,3 +995,469 @@ PS C:\Users\Joe> $complexstructure | ConvertTo-Json
     }
 ]
 ```
+
+## Annex 3. CSV and JSON in PowerShell
+
+There are various cmdlets in PowerShell that help with working with CSV and JSON data:
+- `GetContent`
+- `ConvertFrom-Json`
+- `ConvertTo-Json`
+- `ConvertFrom-Csv`
+- `ConvertTo-Csv`
+- `Import-Csv`
+- `Export-Csv`
+
+### 3.1. Uniform data
+
+Conversion between PowerShell array, JSON and CSV is consistent and predictable
+
+Example data:
+
+|alpha  |beta   |charlie |delta  |echo   |foxtrot|
+|-------|-------|--------|-------|-------|-------|
+|valueA1|valueB1|valueC1 |valueD1|valueE1|valueF1|
+|valueA2|valueB2|valueC2 |valueD2|valueE2|valueF2|
+|valueA3|valueB3|valueC3'|valueD3|valueE3|valueF3|
+
+#### 3.1.1. Starting with CSV, convert to JSON
+
+Assign the CSV data as a multi-line variable:
+
+```pwsh
+PS C:\Users\Joe> $csv = 'alpha,beta,charlie,delta,echo,foxtrot
+>> valueA1,valueB1,valueC1,valueD1,valueE1,valueF1
+>> valueA2,valueB2,valueC2,valueD2,valueE2,valueF2
+>> valueA3,valueB3,valueC3,valueD3,valueE3,valueF3'
+```
+
+The multi-line variable is `string` type:
+
+```pwsh
+PS C:\Users\Joe> $csv.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $csv
+alpha,beta,charlie,delta,echo,foxtrot
+valueA1,valueB1,valueC1,valueD1,valueE1,valueF1
+valueA2,valueB2,valueC2,valueD2,valueE2,valueF2
+valueA3,valueB3,valueC3,valueD3,valueE3,valueF3
+```
+
+Use `ConvertFrom-Csv` to populate data as a PowerShell array:
+
+```pwsh
+PS C:\Users\Joe> $psarray = $csv | ConvertFrom-Csv
+PS C:\Users\Joe> $psarray.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $psarray
+
+
+alpha   : valueA1
+beta    : valueB1
+charlie : valueC1
+delta   : valueD1
+echo    : valueE1
+foxtrot : valueF1
+
+alpha   : valueA2
+beta    : valueB2
+charlie : valueC2
+delta   : valueD2
+echo    : valueE2
+foxtrot : valueF2
+
+alpha   : valueA3
+beta    : valueB3
+charlie : valueC3
+delta   : valueD3
+echo    : valueE3
+foxtrot : valueF3
+```
+
+> [!Tip]
+>
+> If the data exists in a file `data.csv`, `Import-Csv` can be used to import directly as a PowerShell array
+>
+> ```pwsh
+> $psarray = Import-Csv data.csv 
+> ```
+
+`ConvertTo-Json` converts a PowerShell array or oject to a `string` type JSON:
+
+```pwsh
+PS C:\Users\Joe> $json = $psarray | ConvertTo-Json
+PS C:\Users\Joe> $json.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $json
+[
+    {
+        "alpha":  "valueA1",
+        "beta":  "valueB1",
+        "charlie":  "valueC1",
+        "delta":  "valueD1",
+        "echo":  "valueE1",
+        "foxtrot":  "valueF1"
+    },
+    {
+        "alpha":  "valueA2",
+        "beta":  "valueB2",
+        "charlie":  "valueC2",
+        "delta":  "valueD2",
+        "echo":  "valueE2",
+        "foxtrot":  "valueF2"
+    },
+    {
+        "alpha":  "valueA3",
+        "beta":  "valueB3",
+        "charlie":  "valueC3",
+        "delta":  "valueD3",
+        "echo":  "valueE3",
+        "foxtrot":  "valueF3"
+    }
+]
+```
+
+
+#### 3.1.2. Starting with JSON, convert to CSV
+
+Assign the JSON data as a multi-line variable:
+
+```pwsh
+PS C:\Users\Joe> $json='[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1", "delta": "valueD1", "echo": "valueE1", "foxtrot": "valueF1"},
+>> {"alpha": "valueA2", "beta": "valueB2", "charlie": "valueC2", "delta": "valueD2", "echo": "valueE2", "foxtrot": "valueF2"},
+>> {"alpha": "valueA3", "beta": "valueB3", "charlie": "valueC3", "delta": "valueD3", "echo": "valueE3", "foxtrot": "valueF3"}]'
+```
+
+The multi-line variable is `string` type:
+
+```pwsh
+PS C:\Users\Joe> $json.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $json
+[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1", "delta": "valueD1", "echo": "valueE1", "foxtrot": "valueF1"},
+{"alpha": "valueA2", "beta": "valueB2", "charlie": "valueC2", "delta": "valueD2", "echo": "valueE2", "foxtrot": "valueF2"},
+{"alpha": "valueA3", "beta": "valueB3", "charlie": "valueC3", "delta": "valueD3", "echo": "valueE3", "foxtrot": "valueF3"}]
+```
+
+Use `ConvertFrom-Json` to populate data as a PowerShell array:
+
+```pwsh
+PS C:\Users\Joe> $psarray = $json | ConvertFrom-Json
+PS C:\Users\Joe> $psarray.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $psarray
+
+
+alpha   : valueA1
+beta    : valueB1
+charlie : valueC1
+delta   : valueD1
+echo    : valueE1
+foxtrot : valueF1
+
+alpha   : valueA2
+beta    : valueB2
+charlie : valueC2
+delta   : valueD2
+echo    : valueE2
+foxtrot : valueF2
+
+alpha   : valueA3
+beta    : valueB3
+charlie : valueC3
+delta   : valueD3
+echo    : valueE3
+foxtrot : valueF3
+```
+
+> [!Tip]
+>
+> If the data exists in a file `data.json`, `Get-Content` can be used with `ConvertFrom-Json` to import directly as a PowerShell array
+>
+> ```pwsh
+> $psarray = Get-Content data.json | ConvertFrom-Json
+> ```
+
+`ConvertTo-Csv` converts a PowerShell array or oject to a `array` type CSV:
+
+```pwsh
+
+PS C:\Users\Joe> $csv = $psarray | ConvertTo-Csv
+PS C:\Users\Joe> $csv.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $csv
+#TYPE System.Management.Automation.PSCustomObject
+"alpha","beta","charlie","delta","echo","foxtrot"
+"valueA1","valueB1","valueC1","valueD1","valueE1","valueF1"
+"valueA2","valueB2","valueC2","valueD2","valueE2","valueF2"
+"valueA3","valueB3","valueC3","valueD3","valueE3","valueF3"
+```
+
+> [!Tip]
+>
+> A PowerShell array can also be exported to CSV with `Export-Csv`
+>
+> ```pwsh
+> $psarray | Export-Csv data.csv
+> ```
+
+### 3.2. Non-Uniform data
+
+The PowerShell cmdlets work well with uniform data, but can produce unintended results with non-uniform data
+
+Example data:
+
+```json
+[
+  {
+  "alpha": "valueA1",
+  "beta": "valueB1",
+  "charlie": "valueC1"
+  },
+  {
+  "charlie": "valueC2",
+  "delta": "valueD2"
+  },
+  {
+  "delta": "valueD3",
+  "foxtrot": "valueF3"
+  }
+]
+```
+
+#### 3.2.1. Starting with JSON, convert to CSV
+
+Assign the JSON data as a multi-line variable:
+
+```pwsh
+PS C:\Users\Joe> $json = '[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1"},
+>> {"charlie": "valueC2", "delta": "valueD2"},
+>> {"delta": "valueD3", "foxtrot": "valueF3"}]'
+```
+
+The multi-line variable is `string` type:
+
+```pwsh
+PS C:\Users\Joe> $json.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $json
+[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1"},
+{"charlie": "valueC2", "delta": "valueD2"},
+{"delta": "valueD3", "foxtrot": "valueF3"}]
+```
+
+Using `ConvertFrom-Json` to populate data as a PowerShell array has an interesting effect:
+- Only columns `alpha`, `beta` and `charlie` that the first element has data are retained
+- The columns `delta`, `echo` and `foxtrot` are missing
+
+```pwsh
+PS C:\Users\Joe> $psarray = $json | ConvertFrom-Json
+PS C:\Users\Joe> $psarray.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $psarray
+
+alpha   beta    charlie
+-----   ----    -------
+valueA1 valueB1 valueC1
+                valueC2
+```
+
+The data are still accessible with `FL` (`Format-List):
+
+```pwsh
+PS C:\Users\Joe> $psarray | FL
+
+
+alpha   : valueA1
+beta    : valueB1
+charlie : valueC1
+
+charlie : valueC2
+delta   : valueD2
+
+delta   : valueD3
+foxtrot : valueF3
+```
+
+`ConvertTo-Csv` has a disastrous effect as the missing data in `FT` (`Format-Table`) view are not populated in CSV:
+
+```pwsh
+PS C:\Users\Joe> $csv = $psarray | ConvertTo-Csv
+PS C:\Users\Joe> $csv.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $csv
+#TYPE System.Management.Automation.PSCustomObject
+"alpha","beta","charlie"
+"valueA1","valueB1","valueC1"
+,,"valueC2"
+,,
+```
+
+> [!Warning]
+>
+> Attempting to convert JSON data that has non-uniform fields can result in data loss
+>
+> JSON is meant to be flexible and contains only fields that are applicable to the object - be careful when forcing JSON into a tabular representation
+
+#### 3.2.2. Starting with CSV, convert to JSON
+
+Let's the the JSON data in previous section is represent as CSV with empty columns:
+
+|alpha  |beta   |charlie |delta  |echo   |foxtrot|
+|-------|-------|--------|-------|-------|-------|
+|valueA1|valueB1|valueC1 |       |       |       |
+|       |       |valueC2 |valueD2|       |       |
+|       |       |        |valueD3|       |valueF3|
+
+
+Assign the CSV data as a multi-line variable:
+
+```pwsh
+PS C:\Users\Joe> $csv = 'alpha,beta,charlie,delta,echo,foxtrot
+valueA1,valueB1,valueC1,,,
+,,valueC2,valueD2,,
+,,,valueD3,,valueF3'
+```
+
+The multi-line variable is `string` type:
+
+```pwsh
+PS C:\Users\Joe> $csv.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $csv
+alpha,beta,charlie,delta,echo,foxtrot
+valueA1,valueB1,valueC1,,,
+,,valueC2,valueD2,,
+,,,valueD3,,valueF3
+```
+
+`ConvertFrom-Csv` has a less disastrous but possibly problematic effect - empty columns are retained as empty fields:
+
+```pwsh
+PS C:\Users\Joe> $psarray = $csv | ConvertFrom-Csv
+PS C:\Users\Joe> $psarray.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $psarray
+
+
+alpha   : valueA1
+beta    : valueB1
+charlie : valueC1
+delta   :
+echo    :
+foxtrot :
+
+alpha   :
+beta    :
+charlie : valueC2
+delta   : valueD2
+echo    :
+foxtrot :
+
+alpha   :
+beta    :
+charlie :
+delta   : valueD3
+echo    :
+foxtrot : valueF3
+```
+
+`ConvertTo-Json` cascades the empty fields to the JSON body - this can be undesirable as having empty fields in JSON can have a different meaning from not having the fields at all:
+
+```pwsh
+PS C:\Users\Joe> $json = $psarray | ConvertTo-Json
+PS C:\Users\Joe> $json.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+PS C:\Users\Joe> $json
+[
+    {
+        "alpha":  "valueA1",
+        "beta":  "valueB1",
+        "charlie":  "valueC1",
+        "delta":  "",
+        "echo":  "",
+        "foxtrot":  ""
+    },
+    {
+        "alpha":  "",
+        "beta":  "",
+        "charlie":  "valueC2",
+        "delta":  "valueD2",
+        "echo":  "",
+        "foxtrot":  ""
+    },
+    {
+        "alpha":  "",
+        "beta":  "",
+        "charlie":  "",
+        "delta":  "valueD3",
+        "echo":  "",
+        "foxtrot":  "valueF3"
+    }
+]
+```
+
+> [!Important]
+>
+> This doesn't mean the conversion is erroneous - the CSV representation contained empty columns, so `ConvertFrom-Csv` and `ConvertTo-Json` correctly interpreted those empty columns as empty fields
+>
+> This, however, means to be careful with representing JSON data as CSV, as it can have unintended results
