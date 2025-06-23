@@ -1345,7 +1345,7 @@ PS C:\Users\Joe> $csv
 
 #### 3.2.2. Starting with CSV, convert to JSON
 
-Let's the the JSON data in previous section is represent as CSV with empty columns:
+Let's say the JSON data in previous section is represented as CSV with empty columns:
 
 |alpha  |beta   |charlie |delta  |echo   |foxtrot|
 |-------|-------|--------|-------|-------|-------|
