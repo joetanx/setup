@@ -1301,7 +1301,7 @@ valueA1 valueB1 valueC1
                 valueC2
 ```
 
-The data are still accessible with `FL` (`Format-List):
+The data are still accessible with `FL` (`Format-List`):
 
 ```pwsh
 PS C:\Users\Joe> $psarray | FL
