@@ -1640,7 +1640,7 @@ PS C:\Users\Joe> $body = @(
 >> )
 ```
 
-The data is represented as an array of objects, each object being the row of the table:
+The data is represented as an array of objects, each object is a row of the table:
 
 ```pwsh
 PS C:\Users\Joe> $body.GetType()
