@@ -1461,3 +1461,165 @@ PS C:\Users\Joe> $json
 > This doesn't mean the conversion is erroneous - the CSV representation contained empty columns, so `ConvertFrom-Csv` and `ConvertTo-Json` correctly interpreted those empty columns as empty fields
 >
 > This, however, means to be careful with representing JSON data as CSV, as it can have unintended results
+
+### 3.3. Data structure in PowerShell
+
+#### 3.3.1. PowerShell array
+
+The notation to create a PowerShell data object is `@()`
+
+```pwsh
+PS C:\Users\Joe> $body = @(
+>>   'alpha'
+>>   'bravo'
+>>   'charlie'
+>> )
+PS C:\Users\Joe> $body.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Object[]                                 System.Array
+
+
+PS C:\Users\Joe> $body
+alpha
+bravo
+charlie
+```
+
+#### 3.3.2. PowerShell object - HashTable
+
+The notation to create a PowerShell data object is `@{}`
+
+```pwsh
+PS C:\Users\Joe> $body = @{
+>>   alpha='valueA'
+>>   bravo='valueB'
+>>   charlie='valueC'
+>> }
+PS C:\Users\Joe> $body.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+
+
+PS C:\Users\Joe> $body
+
+Name                           Value
+----                           -----
+alpha                          valueA
+bravo                          valueB
+charlie                        valueC
+```
+
+Notice that the data type is `HashTable`, which is a simple key-value data structure
+
+HashTable may not be that useful when creating column-like data:
+
+```pwsh
+PS C:\Users\Joe> $body = @(
+>>   @{
+>>     alpha='valueA1'
+>>     bravo='valueB1'
+>>     charlie='valueC1'
+>>   }
+>>   @{
+>>     alpha='valueA2'
+>>     bravo='valueB2'
+>>     charlie='valueC2'
+>>   }
+>>   @{
+>>     alpha='valueA3'
+>>     bravo='valueB3'
+>>     charlie='valueC3'
+>>   }
+>> )
+PS C:\Users\Joe> $body.GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+
+
+PS C:\Users\Joe> $body
+
+Name                           Value
+----                           -----
+alpha                          valueA1
+bravo                          valueB1
+charlie                        valueC1
+alpha                          valueA2
+bravo                          valueB2
+charlie                        valueC2
+alpha                          valueA3
+bravo                          valueB3
+charlie                        valueC3
+```
+
+#### 3.3.3. PowerShell object - PSCustomObject
+
+Creating data as `PSCustomObject` would be more suitable; this is done by casting the object as `PSCustomObject` by adding `[PSCustomObject]` in front of each of the `@{}` declaration:
+
+```pwsh
+PS C:\Users\Joe> $body = @(
+>>   [PSCustomObject]@{
+>>     alpha='valueA1'
+>>     bravo='valueB1'
+>>     charlie='valueC1'
+>>   }
+>>   [PSCustomObject]@{
+>>     alpha='valueA2'
+>>     bravo='valueB2'
+>>     charlie='valueC2'
+>>   }
+>>   [PSCustomObject]@{
+>>     alpha='valueA3'
+>>     bravo='valueB3'
+>>     charlie='valueC3'
+>>   }
+>> )
+PS C:\Users\Joe> $body[0].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     False    PSCustomObject                           System.Object
+
+
+PS C:\Users\Joe> $body
+
+alpha   bravo   charlie
+-----   -----   -------
+valueA1 valueB1 valueC1
+valueA2 valueB2 valueC2
+valueA3 valueB3 valueC3
+```
+
+This formats the data such can selection by rows and columns is possible
+
+Rows can be referenced by `[<#>]`:
+
+```pwsh
+PS C:\Users\Joe> $body[0]
+
+alpha   bravo   charlie
+-----   -----   -------
+valueA1 valueB1 valueC1
+```
+
+Columns can be referenced by `.<name>`:
+
+```pwsh
+PS C:\Users\Joe> $body.alpha
+valueA1
+valueA2
+valueA3
+PS C:\Users\Joe> $body.bravo
+valueB1
+valueB2
+valueB3
+PS C:\Users\Joe> $body.charlie
+valueC1
+valueC2
+valueC3
+```
