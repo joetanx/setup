@@ -1466,7 +1466,7 @@ PS C:\Users\Joe> $json
 
 #### 3.3.1. PowerShell array
 
-The notation to create a PowerShell data object is `@()`
+The notation to create an array in PowerShell is `@()`
 
 ```pwsh
 PS C:\Users\Joe> $body = @(
@@ -1489,7 +1489,7 @@ charlie
 
 #### 3.3.2. PowerShell object - HashTable
 
-The notation to create a PowerShell data object is `@{}`
+The notation to create a data object in PowerShell is `@{}`
 
 ```pwsh
 PS C:\Users\Joe> $body = @{
@@ -1513,9 +1513,9 @@ bravo                          valueB
 charlie                        valueC
 ```
 
-Notice that the data type is `HashTable`, which is a simple key-value data structure
+The object is created as `HashTable` when the type is not specified
 
-HashTable may not be that useful when creating column-like data:
+`HashTable` is a simple key-value data structure, which may have unintended results such as when the data is supposed to have column-like format:
 
 ```pwsh
 PS C:\Users\Joe> $body = @(
@@ -1535,6 +1535,11 @@ PS C:\Users\Joe> $body = @(
 >>     charlie='valueC3'
 >>   }
 >> )
+```
+
+Instead of an array of objects, the entire data is represented as a list of key-value items:
+
+```pwsh
 PS C:\Users\Joe> $body.GetType()
 
 IsPublic IsSerial Name                                     BaseType
@@ -1557,9 +1562,63 @@ bravo                          valueB3
 charlie                        valueC3
 ```
 
+Retrieving the first element of the array returns that portion of key-value items of that element:
+
+```pwsh
+PS C:\Users\Joe> $body[0].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     Hashtable                                System.Object
+
+
+PS C:\Users\Joe> $body[0]
+
+Name                           Value
+----                           -----
+alpha                          valueA1
+bravo                          valueB1
+charlie                        valueC1
+```
+
+Being a key-value structure, the object has only `Keys` and `Values` columns:
+
+```pwsh
+PS C:\Users\Joe> $body.Keys
+alpha
+bravo
+charlie
+alpha
+bravo
+charlie
+alpha
+bravo
+charlie
+PS C:\Users\Joe> $body.Values
+valueA1
+valueB1
+valueC1
+valueA2
+valueB2
+valueC2
+valueA3
+valueB3
+valueC3
+PS C:\Users\Joe> $body[0].Keys
+alpha
+bravo
+charlie
+PS C:\Users\Joe> $body[0].Values
+valueA1
+valueB1
+valueC1
+```
+
 #### 3.3.3. PowerShell object - PSCustomObject
 
-Creating data as `PSCustomObject` would be more suitable; this is done by casting the object as `PSCustomObject` by adding `[PSCustomObject]` in front of each of the `@{}` declaration:
+Creating data as `PSCustomObject` would be more suitable and allows more flexibility
+
+This is done by casting the object as `PSCustomObject` by adding `[PSCustomObject]` in front of each of the `@{}` declaration:
 
 ```pwsh
 PS C:\Users\Joe> $body = @(
@@ -1579,11 +1638,16 @@ PS C:\Users\Joe> $body = @(
 >>     charlie='valueC3'
 >>   }
 >> )
-PS C:\Users\Joe> $body[0].GetType()
+```
+
+The data is represented as an array of objects, each object being the row of the table:
+
+```pwsh
+PS C:\Users\Joe> $body.GetType()
 
 IsPublic IsSerial Name                                     BaseType
 -------- -------- ----                                     --------
-True     False    PSCustomObject                           System.Object
+True     True     Object[]                                 System.Array
 
 
 PS C:\Users\Joe> $body
@@ -1595,11 +1659,16 @@ valueA2 valueB2 valueC2
 valueA3 valueB3 valueC3
 ```
 
-This formats the data such can selection by rows and columns is possible
-
-Rows can be referenced by `[<#>]`:
+Retrieving the first element of the array returns a row of the table:
 
 ```pwsh
+PS C:\Users\Joe> $body[0].GetType()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     False    PSCustomObject                           System.Object
+
+
 PS C:\Users\Joe> $body[0]
 
 alpha   bravo   charlie
