@@ -1659,7 +1659,7 @@ valueA2 valueB2 valueC2
 valueA3 valueB3 valueC3
 ```
 
-Retrieving the first element of the array returns a row of the table:
+Retrieving the an element of the array returns a row of the table:
 
 ```pwsh
 PS C:\Users\Joe> $body[0].GetType()
