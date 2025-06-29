@@ -1013,7 +1013,7 @@ Conversion between PowerShell array, JSON and CSV is consistent and predictable
 
 Example data:
 
-|alpha  |beta   |charlie |delta  |echo   |foxtrot|
+|alpha  |bravo  |charlie |delta  |echo   |foxtrot|
 |-------|-------|--------|-------|-------|-------|
 |valueA1|valueB1|valueC1 |valueD1|valueE1|valueF1|
 |valueA2|valueB2|valueC2 |valueD2|valueE2|valueF2|
@@ -1024,7 +1024,7 @@ Example data:
 Assign the CSV data as a multi-line variable:
 
 ```pwsh
-PS C:\Users\Joe> $csv = 'alpha,beta,charlie,delta,echo,foxtrot
+PS C:\Users\Joe> $csv = 'alpha,bravo,charlie,delta,echo,foxtrot
 >> valueA1,valueB1,valueC1,valueD1,valueE1,valueF1
 >> valueA2,valueB2,valueC2,valueD2,valueE2,valueF2
 >> valueA3,valueB3,valueC3,valueD3,valueE3,valueF3'
@@ -1041,7 +1041,7 @@ True     True     String                                   System.Object
 
 
 PS C:\Users\Joe> $csv
-alpha,beta,charlie,delta,echo,foxtrot
+alpha,bravo,charlie,delta,echo,foxtrot
 valueA1,valueB1,valueC1,valueD1,valueE1,valueF1
 valueA2,valueB2,valueC2,valueD2,valueE2,valueF2
 valueA3,valueB3,valueC3,valueD3,valueE3,valueF3
@@ -1062,21 +1062,21 @@ PS C:\Users\Joe> $psarray
 
 
 alpha   : valueA1
-beta    : valueB1
+bravo    : valueB1
 charlie : valueC1
 delta   : valueD1
 echo    : valueE1
 foxtrot : valueF1
 
 alpha   : valueA2
-beta    : valueB2
+bravo    : valueB2
 charlie : valueC2
 delta   : valueD2
 echo    : valueE2
 foxtrot : valueF2
 
 alpha   : valueA3
-beta    : valueB3
+bravo    : valueB3
 charlie : valueC3
 delta   : valueD3
 echo    : valueE3
@@ -1106,7 +1106,7 @@ PS C:\Users\Joe> $json
 [
     {
         "alpha":  "valueA1",
-        "beta":  "valueB1",
+        "bravo":  "valueB1",
         "charlie":  "valueC1",
         "delta":  "valueD1",
         "echo":  "valueE1",
@@ -1114,7 +1114,7 @@ PS C:\Users\Joe> $json
     },
     {
         "alpha":  "valueA2",
-        "beta":  "valueB2",
+        "bravo":  "valueB2",
         "charlie":  "valueC2",
         "delta":  "valueD2",
         "echo":  "valueE2",
@@ -1122,7 +1122,7 @@ PS C:\Users\Joe> $json
     },
     {
         "alpha":  "valueA3",
-        "beta":  "valueB3",
+        "bravo":  "valueB3",
         "charlie":  "valueC3",
         "delta":  "valueD3",
         "echo":  "valueE3",
@@ -1137,9 +1137,9 @@ PS C:\Users\Joe> $json
 Assign the JSON data as a multi-line variable:
 
 ```pwsh
-PS C:\Users\Joe> $json='[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1", "delta": "valueD1", "echo": "valueE1", "foxtrot": "valueF1"},
->> {"alpha": "valueA2", "beta": "valueB2", "charlie": "valueC2", "delta": "valueD2", "echo": "valueE2", "foxtrot": "valueF2"},
->> {"alpha": "valueA3", "beta": "valueB3", "charlie": "valueC3", "delta": "valueD3", "echo": "valueE3", "foxtrot": "valueF3"}]'
+PS C:\Users\Joe> $json='[{"alpha": "valueA1", "bravo": "valueB1", "charlie": "valueC1", "delta": "valueD1", "echo": "valueE1", "foxtrot": "valueF1"},
+>> {"alpha": "valueA2", "bravo": "valueB2", "charlie": "valueC2", "delta": "valueD2", "echo": "valueE2", "foxtrot": "valueF2"},
+>> {"alpha": "valueA3", "bravo": "valueB3", "charlie": "valueC3", "delta": "valueD3", "echo": "valueE3", "foxtrot": "valueF3"}]'
 ```
 
 The multi-line variable is `string` type:
@@ -1153,9 +1153,9 @@ True     True     String                                   System.Object
 
 
 PS C:\Users\Joe> $json
-[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1", "delta": "valueD1", "echo": "valueE1", "foxtrot": "valueF1"},
-{"alpha": "valueA2", "beta": "valueB2", "charlie": "valueC2", "delta": "valueD2", "echo": "valueE2", "foxtrot": "valueF2"},
-{"alpha": "valueA3", "beta": "valueB3", "charlie": "valueC3", "delta": "valueD3", "echo": "valueE3", "foxtrot": "valueF3"}]
+[{"alpha": "valueA1", "bravo": "valueB1", "charlie": "valueC1", "delta": "valueD1", "echo": "valueE1", "foxtrot": "valueF1"},
+{"alpha": "valueA2", "bravo": "valueB2", "charlie": "valueC2", "delta": "valueD2", "echo": "valueE2", "foxtrot": "valueF2"},
+{"alpha": "valueA3", "bravo": "valueB3", "charlie": "valueC3", "delta": "valueD3", "echo": "valueE3", "foxtrot": "valueF3"}]
 ```
 
 Use `ConvertFrom-Json` to populate data as a PowerShell array:
@@ -1173,21 +1173,21 @@ PS C:\Users\Joe> $psarray
 
 
 alpha   : valueA1
-beta    : valueB1
+bravo    : valueB1
 charlie : valueC1
 delta   : valueD1
 echo    : valueE1
 foxtrot : valueF1
 
 alpha   : valueA2
-beta    : valueB2
+bravo    : valueB2
 charlie : valueC2
 delta   : valueD2
 echo    : valueE2
 foxtrot : valueF2
 
 alpha   : valueA3
-beta    : valueB3
+bravo    : valueB3
 charlie : valueC3
 delta   : valueD3
 echo    : valueE3
@@ -1216,7 +1216,7 @@ True     True     Object[]                                 System.Array
 
 PS C:\Users\Joe> $csv
 #TYPE System.Management.Automation.PSCustomObject
-"alpha","beta","charlie","delta","echo","foxtrot"
+"alpha","bravo","charlie","delta","echo","foxtrot"
 "valueA1","valueB1","valueC1","valueD1","valueE1","valueF1"
 "valueA2","valueB2","valueC2","valueD2","valueE2","valueF2"
 "valueA3","valueB3","valueC3","valueD3","valueE3","valueF3"
@@ -1240,7 +1240,7 @@ Example data:
 [
   {
   "alpha": "valueA1",
-  "beta": "valueB1",
+  "bravo": "valueB1",
   "charlie": "valueC1"
   },
   {
@@ -1259,7 +1259,7 @@ Example data:
 Assign the JSON data as a multi-line variable:
 
 ```pwsh
-PS C:\Users\Joe> $json = '[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1"},
+PS C:\Users\Joe> $json = '[{"alpha": "valueA1", "bravo": "valueB1", "charlie": "valueC1"},
 >> {"charlie": "valueC2", "delta": "valueD2"},
 >> {"delta": "valueD3", "foxtrot": "valueF3"}]'
 ```
@@ -1275,13 +1275,13 @@ True     True     String                                   System.Object
 
 
 PS C:\Users\Joe> $json
-[{"alpha": "valueA1", "beta": "valueB1", "charlie": "valueC1"},
+[{"alpha": "valueA1", "bravo": "valueB1", "charlie": "valueC1"},
 {"charlie": "valueC2", "delta": "valueD2"},
 {"delta": "valueD3", "foxtrot": "valueF3"}]
 ```
 
 Using `ConvertFrom-Json` to populate data as a PowerShell array has an interesting effect:
-- Only columns `alpha`, `beta` and `charlie` that the first element has data are retained
+- Only columns `alpha`, `bravo` and `charlie` that the first element has data are retained
 - The columns `delta`, `echo` and `foxtrot` are missing
 
 ```pwsh
@@ -1295,7 +1295,7 @@ True     True     Object[]                                 System.Array
 
 PS C:\Users\Joe> $psarray
 
-alpha   beta    charlie
+alpha   bravo   charlie
 -----   ----    -------
 valueA1 valueB1 valueC1
                 valueC2
@@ -1308,7 +1308,7 @@ PS C:\Users\Joe> $psarray | FL
 
 
 alpha   : valueA1
-beta    : valueB1
+bravo    : valueB1
 charlie : valueC1
 
 charlie : valueC2
@@ -1331,7 +1331,7 @@ True     True     Object[]                                 System.Array
 
 PS C:\Users\Joe> $csv
 #TYPE System.Management.Automation.PSCustomObject
-"alpha","beta","charlie"
+"alpha","bravo","charlie"
 "valueA1","valueB1","valueC1"
 ,,"valueC2"
 ,,
@@ -1347,7 +1347,7 @@ PS C:\Users\Joe> $csv
 
 Let's say the JSON data in previous section is represented as CSV with empty columns:
 
-|alpha  |beta   |charlie |delta  |echo   |foxtrot|
+|alpha  |bravo  |charlie |delta  |echo   |foxtrot|
 |-------|-------|--------|-------|-------|-------|
 |valueA1|valueB1|valueC1 |       |       |       |
 |       |       |valueC2 |valueD2|       |       |
@@ -1357,7 +1357,7 @@ Let's say the JSON data in previous section is represented as CSV with empty col
 Assign the CSV data as a multi-line variable:
 
 ```pwsh
-PS C:\Users\Joe> $csv = 'alpha,beta,charlie,delta,echo,foxtrot
+PS C:\Users\Joe> $csv = 'alpha,bravo,charlie,delta,echo,foxtrot
 valueA1,valueB1,valueC1,,,
 ,,valueC2,valueD2,,
 ,,,valueD3,,valueF3'
@@ -1374,7 +1374,7 @@ True     True     String                                   System.Object
 
 
 PS C:\Users\Joe> $csv
-alpha,beta,charlie,delta,echo,foxtrot
+alpha,bravo,charlie,delta,echo,foxtrot
 valueA1,valueB1,valueC1,,,
 ,,valueC2,valueD2,,
 ,,,valueD3,,valueF3
@@ -1395,21 +1395,21 @@ PS C:\Users\Joe> $psarray
 
 
 alpha   : valueA1
-beta    : valueB1
+bravo    : valueB1
 charlie : valueC1
 delta   :
 echo    :
 foxtrot :
 
 alpha   :
-beta    :
+bravo    :
 charlie : valueC2
 delta   : valueD2
 echo    :
 foxtrot :
 
 alpha   :
-beta    :
+bravo    :
 charlie :
 delta   : valueD3
 echo    :
@@ -1431,7 +1431,7 @@ PS C:\Users\Joe> $json
 [
     {
         "alpha":  "valueA1",
-        "beta":  "valueB1",
+        "bravo":  "valueB1",
         "charlie":  "valueC1",
         "delta":  "",
         "echo":  "",
@@ -1439,7 +1439,7 @@ PS C:\Users\Joe> $json
     },
     {
         "alpha":  "",
-        "beta":  "",
+        "bravo":  "",
         "charlie":  "valueC2",
         "delta":  "valueD2",
         "echo":  "",
@@ -1447,7 +1447,7 @@ PS C:\Users\Joe> $json
     },
     {
         "alpha":  "",
-        "beta":  "",
+        "bravo":  "",
         "charlie":  "",
         "delta":  "valueD3",
         "echo":  "",
