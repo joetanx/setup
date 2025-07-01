@@ -33,7 +33,7 @@ password=SuperPassword&username=test%40example.com
 ##### Request code
 
 ```sh
-curl -d 'username=test@example.com' -d 'password=SuperPassword'  http://server/login
+curl -d 'username=test@example.com' -d 'password=SuperPassword' http://server/login
 ```
 
 ##### Request sent
