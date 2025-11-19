@@ -14,13 +14,13 @@ Pull container image
 docker pull docker.io/library/nginx
 ```
 
-Examples
+Docker run example:
 
 ```sh
 docker run -d --name nginx \
-  --restart unless-stopped -p 80:80 \
-  -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
-  docker.io/library/nginx:latest
+--restart unless-stopped -p 80:80 \
+-v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+docker.io/library/nginx:latest
 ```
 
 |Option|Purpose|
@@ -212,10 +212,10 @@ Running a container with network aliases creates DNS records for the aliases
 
 ```sh
 docker run -d --name nginx \
-  --network app \
-  --network-alias webserver \
-  --network-alias api \
-  docker.io/library/nginx
+--network app \
+--network-alias webserver \
+--network-alias api \
+docker.io/library/nginx
 ```
 
 Client can reach nginx by any of the network names:
