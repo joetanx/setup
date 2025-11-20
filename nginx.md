@@ -119,7 +119,7 @@ Edit `dst_host:dst_port` to required locations:
 cat /opt/nginx/nginx.conf | sed "s/dst_host/n8n/" | sed "s/dst_port/5678/" | tee /opt/nginx/nginx.conf
 ```
 
-### 1.4. Prepare TLS certificates
+### 2.4. Prepare TLS certificates
 
 Example using certificates from [lab-certs](https://github.com/joetanx/lab-certs/)
 
@@ -130,9 +130,9 @@ curl -sLo /opt/nginx/tls/server.key https://github.com/joetanx/lab-certs/raw/mai
 curl -sLo /opt/nginx/tls/cacert.pem https://github.com/joetanx/lab-certs/raw/main/ca/lab_chain.pem
 ```
 
-### 1.5. Run container with the config file and certificates mounted
+### 2.5. Run container with the config file and certificates mounted
 
-#### 1.5.1. Example: podman run
+#### 2.5.1. Example: podman run
 
 Example network:
 
@@ -152,7 +152,7 @@ nginx container:
 podman run -d --name nginx -h nginx --network n8n -p 80:80 -p 443:443 -v /opt/nginx/tls:/etc/nginx/tls:Z -v /opt/nginx/nginx.conf:/etc/nginx/nginx.conf:Z docker.io/nginx:latest
 ```
 
-#### 1.5.2. Example: quadlet
+#### 2.5.2. Example: quadlet
 
 Example network:
 
@@ -228,7 +228,8 @@ systemctl start nginx
 
 > [!Note]
 >
-> 1. Only the nginx service needs to be started as the application and network services would be automaticall started as dependencies stated in the unit files
+> ## Quadlets:
+> 1. Only the nginx service needs to be started, the application and network services are automatically started as dependencies stated in the unit files
 > 2. There is no need to `enable` the services as quadlets would always start on boot
 >
 > Example error when trying to enable the quadlet service:
