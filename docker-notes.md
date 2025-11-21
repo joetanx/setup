@@ -20,6 +20,12 @@ Docker run example:
 docker run -d --name nginx \
 --restart unless-stopped -p 80:80 \
 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+-e DB_USER=app \
+-e DB_PASSWORD=donotembedpasswordinenv \
+-l traefik.enable=true \
+-l "traefik.http.routers.whoami.rule=Host(\`web.lab.vx\`)" \
+-l traefik.http.routers.whoami.entrypoints=websecure \
+-l traefik.http.routers.whoami.tls=true \
 docker.io/library/nginx:latest
 ```
 
@@ -30,8 +36,10 @@ docker.io/library/nginx:latest
 |`--name <string>`|Assign a name to the container|
 |`--restart <string>`|Restart policy to apply when a container exits (default "no")|
 |`--rm`|Automatically remove the container and its associated anonymous volumes when it exits<br>• use with `-d`: container runs like a process and discard itself after<br>• use with `-it`: usually for containers that are client utilities, interact and discard after|
-|`-p`, `--publish <host_port>:<container_port>`|Publish a container's port(s) to the host|
-|`-v`, `--volume <host_dir>:<container_dir>:<options>`|Bind mount a volume<br>SELinux options<br>• `:z`: sets shared SELinux label (share volume to multiple containers)<br>• `:Z`: sets private SELinux label (volume used by only one container)<br>• `:ro`: mounts volume as read-only inside container|
+|`-p`, `--publish` `<host_port>:<container_port>`|Publish a container's port(s) to the host|
+|`-e`, `--env` `<key>=<value>`|Set environment variables|
+|`-v`, `--volume` `<host_dir>:<container_dir>:<options>`|Bind mount a volume<br>SELinux options<br>• `:z`: sets shared SELinux label (share volume to multiple containers)<br>• `:Z`: sets private SELinux label (volume used by only one container)<br>• `:ro`: mounts volume as read-only inside container|
+|`-l`, `--label` `<key>=<value>`|Set meta data on a container|
 |`--network <network>`|Connect a container to a network|
 |`--network-alias <list>`|Add network-scoped alias for the container|
 
