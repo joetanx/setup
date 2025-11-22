@@ -1,22 +1,23 @@
 ## 1. Traefik example
 
-- Using private PKI chain based on [lab-certs](https://github.com/joetanx/lab-certs)
+- Using private PKI chain from [lab-certs](https://github.com/joetanx/lab-certs)
 - Scenarios to show routing based on `Host` and `PathPrefix`
 
 Setup architecture:
 
 ```mermaid
 flowchart TD
-  A(Request) -->|443| B(websecure<br>EntryPoint)
+  A(Request) -->|443| B(EntryPoint:<br>websecure)
   subgraph Docker Host
   subgraph Traefik container
   B --> C(TLS<br>Certificates)
   B --> D{HTTP<br>Routers}
+  D-->|traefik.vx| B1(Traefik Dashboard<br>api@internal)
   end
-  D -->|one.web/| E[webone<br>container]
-  D -->|one.web/sub| F[webonesub<br>container]
-  D -->|two.web/| G[webtwo<br>container]
-  D -->|two.web/sub| H[webtwosub<br>container]
+  D --->|one.web/| E[webone<br>container]
+  D --->|one.web/sub| F[webonesub<br>container]
+  D --->|two.web/| G[webtwo<br>container]
+  D --->|two.web/sub| H[webtwosub<br>container]
   end
 ```
 
@@ -66,14 +67,16 @@ cat lab_issuer.pem >> traefik.pem
 
 ## 3. Setup Traefik
 
-Create directory for certificates and Traefik dynamic configuration file
+Setup directories to be `-v` mounted to Traefic container:
+- `/opt/traefik/dynamic`: for the Traefik dynamic configuration file
+- `/opt/traefik/tls`: for certificates, move the certificates created here
 
 ```sh
 mkdir -p /opt/traefik/{dynamic,tls}
 mv web{one,two}.{pem,key} traefik.{pem,key} /opt/traefik/tls/
 ```
 
-Download the root certificate for [lab-certs](https://github.com/joetanx/lab-certs) and place in the certificates directory
+Download the root certificate for [lab-certs](https://github.com/joetanx/lab-certs) and place in the `/opt/traefik/tls` certificates directory:
 
 ```sh
 curl -sLo /opt/traefik/tls/cacert.pem https://github.com/joetanx/lab-certs/raw/main/ca/lab_root.pem
@@ -102,7 +105,7 @@ tls:
       keyFile: /etc/traefik/tls/webtwo.key
 ```
 
-Create firewall rules to allow inbound HTTPS traffic
+Create firewall rules to allow inbound HTTPS traffic:
 
 ```sh
 firewall-cmd --permanent --add-service https && firewall-cmd --reload
@@ -114,7 +117,7 @@ Create Docker network:
 docker network create app
 ```
 
-Run Traefik container
+Run Traefik container:
 
 ```sh
 docker run -d --restart unless-stopped --network app \
@@ -139,19 +142,66 @@ docker run -d --restart unless-stopped --network app \
 --entryPoints.websecure.http.tls=true
 ```
 
+> [!Note]
+>
+> |Option|Remark|
+> |---|---|
+> |`-v /var/run/docker.sock:/var/run/docker.sock:ro`|Traefik uses the Docker socket to detect new routes based on the container labels|
+> |`-v /opt/traefik/...:/etc/traefik/...`|Mount the certificates and dynamic configuration directories|
+> |`-l traefik.http.routers.dashboard....`|This is an example of route settings, this one is for the Traefik dashboard|
+> |`--api...`, `--providers...`, `--entryPoint...`|Traefik startup (static) configuration, note that these are Docker CMDs for the container (specified after the image)|
+
 ### 3.1. Test Traefik dashboard access
 
+When the certificates and the dynamic configuration are setup correctly, Traefik uses the certificate that has the corresponding CN or SAN:
+
 ![](https://github.com/user-attachments/assets/f1a6ae78-bd54-4bf9-9e77-5fe594c87302)
+
+If Traefik cannot find a certificate with the corresponding CN or SAN, it uses a default signed-self certificate:
+
+![](https://github.com/user-attachments/assets/94af4a7b-0e6c-499b-8648-c48c3f918c2b)
+
+Traefik is the only container running on the Docker host, so the dashboard shows only 1 HTTP Routers:
 
 ![](https://github.com/user-attachments/assets/52c6ab62-5c6a-44dc-9bae-11e7bb1512f3)
 
 ![](https://github.com/user-attachments/assets/c5f87375-5e5c-42fb-8b4c-01bde0b5d0a6)
 
+The HTTP services running now are the `@internal` Traefik services and the Traefik container detected through the Docker socket:
+
 ![](https://github.com/user-attachments/assets/26c96bd5-33d6-43d9-998e-5829e96c9c43)
 
 ## 4. Setup test destination containers
 
-webone:
+The `traefik/whoami` container image is used to test HTTP routing and request behaviour - this container simply returns HTTP request details from the client
+
+The labels on the destination containers specify how Traefik should route the traffic to the them
+
+As seen with the Traefik dashboard above, the syntax for http router is: `traefik.http.routers.<service>.<setting>`
+
+|Label|Remark|
+|---|---|
+|`traefik.http.routers.<service>.rule=<rule>`|Rules are a set of matchers configured with values, that determine if a particular request matches specific criteria.|
+|`traefik.http.routers.<service>.entrypoints=websecure`|Specify the entry points to which the router is attached.<br>This can be a single value or a list.<br>If not specified, HTTP routers are attached to all entry points.|
+|`traefik.http.routers.<service>.tls=true`|TLS configuration for the router.<br>When specified, the router will only handle HTTPS requests.|
+
+More details: https://doc.traefik.io/traefik/reference/routing-configuration/http/routing/router/
+
+> [!Note]
+>
+> By default, Traefik uses the first exposed port of a container.
+>
+> Setting the label `traefik.http.services.<service>.loadbalancer.server.port` overrides that behavior.
+>
+> e.g. `traefik.http.services.my-service.loadbalancer.server.port=12345`
+>
+> More details: [Specify a Custom Port for the Container](https://doc.traefik.io/traefik/reference/routing-configuration/other-providers/docker/)
+
+### 4.1. Routing by `Host`
+
+The rule: ``Host(`<hostname>`)`` matches traffic by hostname in the request|
+
+#### 4.1.1. webone
 
 ```sh
 docker run -d --restart unless-stopped --network app \
@@ -162,7 +212,7 @@ docker run -d --restart unless-stopped --network app \
 --name webone docker.io/traefik/whoami
 ```
 
-webonesub:
+#### 4.1.2. webtwo
 
 ```sh
 docker run -d --restart unless-stopped --network app \
@@ -173,7 +223,25 @@ docker run -d --restart unless-stopped --network app \
 --name webtwo docker.io/traefik/whoami
 ```
 
-webtwo:
+### 4.2. Routing by `Host` and `PathPrefix`
+
+The rule: ``Host(`<hostname>`) && PathPrefix(`/<path>`)`` matches traffic by hostname and path in the request
+
+Rules support `AND` (`&&`) and `OR` (`||`) logical operators. More details: https://doc.traefik.io/traefik/reference/routing-configuration/http/routing/rules-and-priority/
+
+> [!Note]
+>
+> The `PathPrefix` matcher preserves the prefix and sends the request to the corresponding path in the destination (i.e. Traefik `/sub` →  Destination `/sub`)
+>
+> If the desired behaviour is to "nest" the root of the destination behind a path on Traefik (i.e. Traefik `/sub` →  Destination `/`), the prefix needs to be removed when forwarding requests
+> 
+> The [`stripPrefix`](https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/stripprefix/) middleware strips the matching path prefix and stores it in an `X-Forwarded-Prefix header`.
+>
+> The following settings configure the prefix stripping behaviour:
+> - `traefik.http.routers.<service-name>.middlewares=<middleware-name>`: attaches a middleware to the HTTP router
+> - `traefik.http.middlewares.<middleware-name>.stripprefix.prefixes=<path-to-strip>`: specifies the path to strip
+
+#### 4.2.1. webonesub
 
 ```sh
 docker run -d --restart unless-stopped --network app \
@@ -186,7 +254,7 @@ docker run -d --restart unless-stopped --network app \
 --name webonesub docker.io/traefik/whoami
 ```
 
-webtwosub:
+#### 4.2.2. webtwosub
 
 ```sh
 docker run -d --restart unless-stopped --network app \
@@ -199,7 +267,9 @@ docker run -d --restart unless-stopped --network app \
 --name webtwosub docker.io/traefik/whoami
 ```
 
-### 4.1. Verify updates on Traefik dashboard
+### 4.3. Verify updates on Traefik dashboard
+
+Traefik picks up the HTTP routers and services configured in the test containers via the Docker socket:
 
 ![](https://github.com/user-attachments/assets/be24c958-66d5-406b-8587-1226de9e2494)
 
@@ -207,15 +277,21 @@ docker run -d --restart unless-stopped --network app \
 
 ![](https://github.com/user-attachments/assets/b2a27cb1-cfa3-4602-ba4f-c0b76aa718f1)
 
+The strip prefix middlewares are also listed:
+
 ![](https://github.com/user-attachments/assets/80a3819b-384d-4d14-a46a-2b40c846653e)
 
 ## 5. Testing routing
 
 ### 5.1. one.web
 
+Traefik used the _Web Server One_ certificate for requests to `one.web`
+
 ![](https://github.com/user-attachments/assets/1ac032b9-38a0-4078-b23f-0d789b4404f5)
 
-`https://one.web`:
+#### `https://one.web`
+
+Request for `one.web` hostname went to the `webone` container at `172.18.0.3` and the requested path seen by the container is `/`
 
 ```http
 Hostname: 169be963b696
@@ -245,7 +321,9 @@ X-Forwarded-Server: a2bc03a507eb
 X-Real-Ip: 192.168.84.11
 ```
 
-`https://one.web/blahblahblah`:
+#### `https://one.web/blahblahblah`
+
+Similar to above, the request went to the `webone` container at `172.18.0.3` and the requested path seen by the container is `/blahblahblah` according to the client's request
 
 ```http
 Hostname: 169be963b696
@@ -275,7 +353,11 @@ X-Forwarded-Server: a2bc03a507eb
 X-Real-Ip: 192.168.84.11
 ```
 
-`https://one.web/sub`:
+#### `https://one.web/sub`
+
+As configured in the `webonesub` HTTP router, request to `one.web` AND `/sub` is sent to `webonesub` container at `172.18.0.5`
+
+The `/sub` is stripped when forwarding the request, and the requested path seen by the container is `/`
 
 ```http
 Hostname: c9cdbf7a0934
@@ -309,9 +391,13 @@ X-Real-Ip: 192.168.84.11
 
 ### 5.2. two.web
 
+Traefik used the _Web Server Two_ certificate for requests to `two.web`
+
 ![](https://github.com/user-attachments/assets/1af81133-976f-41fd-b129-78e7cba14a36)
 
-`https://two.web`:
+#### `https://two.web`
+
+Request for `two.web` hostname went to the `webtwo` container at `172.18.0.4` and the requested path seen by the container is `/`
 
 ```http
 Hostname: af68c41a9f29
@@ -342,7 +428,9 @@ X-Forwarded-Server: a2bc03a507eb
 X-Real-Ip: 192.168.84.11
 ```
 
-`https://two.web/blahblahblah`:
+#### `https://two.web/blahblahblah`
+
+Similar to above, the request went to the `webtwo` container at `172.18.0.4` and the requested path seen by the container is `/blahblahblah` according to the client's request
 
 ```http
 Hostname: af68c41a9f29
@@ -373,7 +461,11 @@ X-Forwarded-Server: a2bc03a507eb
 X-Real-Ip: 192.168.84.11
 ```
 
-`https://two.web/sub`:
+#### `https://two.web/sub`
+
+As configured in the `webtwosub` HTTP router, request to `two.web` AND `/sub` is sent to `webtwosub` container at `172.18.0.6`
+
+The `/sub` is stripped when forwarding the request, and the requested path seen by the container is `/`
 
 ```http
 Hostname: 4f62be807db1
