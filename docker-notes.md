@@ -51,6 +51,10 @@ firewall-cmd --permanent --add-service http && firewall-cmd --reload
 
 ## 2. Container name resolution
 
+As [documented](https://docs.docker.com/engine/network/#container-networks):
+- By default, containers inherit the DNS settings as defined in the `/etc/resolv.conf` configuration file. Containers that attach to the default `bridge` network receive a copy of this file.
+- Containers that attach to a [custom network](https://docs.docker.com/engine/network/tutorials/standalone/#use-user-defined-bridge-networks) use Docker's embedded DNS server. The embedded DNS server forwards external DNS lookups to the DNS servers configured on the host.
+
 ### 2.1. Containers on default `bridge` network cannot communicate using container names
 
 Run a nginx and a client container:
@@ -65,26 +69,26 @@ Check that both containers are on the `bridge` network:
 ```console
 [root@docker ~]# docker inspect bridge
 [
-    {
-        "Name": "bridge",
-        ⋮
-        "Containers": {
-            "b5ebb93f427924f3cffc65d5b18cc4036536c82a348bd6204ff8414026c95d5c": {
-                "Name": "nginx",
-                "EndpointID": "3a5e54917281253c40cdf1fcdf59bcf4897e1bcbcaadbd5b6202c8a83f0ab564",
-                "MacAddress": "22:b8:a6:d8:ef:63",
-                "IPv4Address": "172.17.0.2/16",
-                "IPv6Address": ""
-            },
-            "bdaa15d84ee2c1fdcc6d2816cd2197d9fe8662c5e360799974a5a57b4023bcdc": {
-                "Name": "client",
-                "EndpointID": "801817de93dc747c421e4d88d5105847b736eb8ddc972ae8b9d92912accdb134",
-                "MacAddress": "f2:26:24:9d:7c:99",
-                "IPv4Address": "172.17.0.3/16",
-                "IPv6Address": ""
-            }
-        },
-        ⋮
+  {
+    "Name": "bridge",
+    ⋮
+    "Containers": {
+      "b5ebb93f427924f3cffc65d5b18cc4036536c82a348bd6204ff8414026c95d5c": {
+        "Name": "nginx",
+        "EndpointID": "3a5e54917281253c40cdf1fcdf59bcf4897e1bcbcaadbd5b6202c8a83f0ab564",
+        "MacAddress": "22:b8:a6:d8:ef:63",
+        "IPv4Address": "172.17.0.2/16",
+        "IPv6Address": ""
+      },
+      "bdaa15d84ee2c1fdcc6d2816cd2197d9fe8662c5e360799974a5a57b4023bcdc": {
+        "Name": "client",
+        "EndpointID": "801817de93dc747c421e4d88d5105847b736eb8ddc972ae8b9d92912accdb134",
+        "MacAddress": "f2:26:24:9d:7c:99",
+        "IPv4Address": "172.17.0.3/16",
+        "IPv6Address": ""
+      }
+    },
+    ⋮
 ```
 
 Attempt to ping nginx from client fails:
@@ -157,26 +161,26 @@ Check that both containers are on the custom network:
 ```console
 [root@docker ~]# docker inspect bridge
 [
-    {
-        "Name": "app",
-        ⋮
-        "Containers": {
-            "28a445e8df5ebb93615b331408751e50142f210febb3b8a7cefbfd8c3a4c8d01": {
-                "Name": "client",
-                "EndpointID": "2adbb6db0bd267cf94e3c4b38b61035e0ed440675452a4b70f431c08e611b89f",
-                "MacAddress": "66:6a:e7:99:71:bd",
-                "IPv4Address": "172.18.0.3/16",
-                "IPv6Address": ""
-            },
-            "a621744f37a68d0d3d54dadc126fbfbaf2fb7b011afcfb7f2599f71f82717c9c": {
-                "Name": "nginx",
-                "EndpointID": "837c57849fdc64c0046dcd48f9f5ec844f227bf6c534bca84e5ca6244a3ae273",
-                "MacAddress": "fa:5e:a2:45:38:8f",
-                "IPv4Address": "172.18.0.2/16",
-                "IPv6Address": ""
-            }
-        },
-        ⋮
+  {
+    "Name": "app",
+    ⋮
+    "Containers": {
+      "28a445e8df5ebb93615b331408751e50142f210febb3b8a7cefbfd8c3a4c8d01": {
+        "Name": "client",
+        "EndpointID": "2adbb6db0bd267cf94e3c4b38b61035e0ed440675452a4b70f431c08e611b89f",
+        "MacAddress": "66:6a:e7:99:71:bd",
+        "IPv4Address": "172.18.0.3/16",
+        "IPv6Address": ""
+      },
+      "a621744f37a68d0d3d54dadc126fbfbaf2fb7b011afcfb7f2599f71f82717c9c": {
+        "Name": "nginx",
+        "EndpointID": "837c57849fdc64c0046dcd48f9f5ec844f227bf6c534bca84e5ca6244a3ae273",
+        "MacAddress": "fa:5e:a2:45:38:8f",
+        "IPv4Address": "172.18.0.2/16",
+        "IPv6Address": ""
+      }
+    },
+    ⋮
 ```
 
 Attempt to connect nginx from client works:
@@ -196,7 +200,7 @@ null                 100% |********************************|   615  0:00:00 ETA
 '/dev/null' saved
 ```
 
-This is because the Docker network DNS server is populated in containers' `/etc/resolv.conf` in custom networks:
+This is because the Docker embedded DNS server is populated in containers' `/etc/resolv.conf` in custom networks:
 
 ```sh
 / # cat /etc/resolv.conf
