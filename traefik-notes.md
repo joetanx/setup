@@ -8,11 +8,11 @@ Setup architecture:
 ```mermaid
 flowchart TD
   A(Request) -->|443| B(EntryPoint:<br>websecure)
-  subgraph Docker Host
+  subgraph Docker host
   subgraph Traefik container
   B --> C(TLS<br>Certificates)
   B --> D{HTTP<br>Routers}
-  D-->|traefik.vx| B1(Traefik Dashboard<br>api@internal)
+  D -->|traefik.vx| B1(Traefik Dashboard<br>api@internal)
   end
   D --->|one.web/| E[webone<br>container]
   D --->|one.web/sub| F[webonesub<br>container]
