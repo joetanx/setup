@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for traefik dynamic configuration
+After=network.target
+
+[Volume]
+VolumeName=traefik-dynamic
+
+[Install]
+WantedBy=multi-user.target

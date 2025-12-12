@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for traefik certificates
+After=network.target
+
+[Volume]
+VolumeName=traefik-tls
+
+[Install]
+WantedBy=multi-user.target
