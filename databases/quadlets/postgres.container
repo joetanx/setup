@@ -1,0 +1,15 @@
+[Unit]
+Description=postgresql container
+Requires=lab-network.service
+After=lab-network.service
+
+[Container]
+ContainerName=postgres
+Image=docker.io/library/postgres:latest
+Network=lab.network
+Volume=postgres.volume:/var/lib/postgresql:Z
+# sets password for `postgres` when `POSTGRES_USER` is not specified
+Environment=POSTGRES_PASSWORD=password
+
+[Install]
+WantedBy=multi-user.target
