@@ -8,7 +8,7 @@ flowchart TD
   subgraph "Podman host"
     B -->|langflow.vx| C1(Langflow)
     B -->|n8n.vx| C2(n8n)
-    C1 --> D(PostgresSQL)
+    C1 --> D(postgres)
     C2 --> D
   end
 ```
