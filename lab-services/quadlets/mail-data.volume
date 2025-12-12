@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for mail systemdata
+After=network.target
+
+[Volume]
+VolumeName=mail-data
+
+[Install]
+WantedBy=multi-user.target

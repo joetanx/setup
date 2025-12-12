@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for gitlab config
+After=network.target
+
+[Volume]
+VolumeName=gitlab-config
+
+[Install]
+WantedBy=multi-user.target

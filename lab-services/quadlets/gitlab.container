@@ -1,0 +1,47 @@
+[Unit]
+Description=gitlab container
+Requires=lab-network.service
+Requires=postgres.service
+Requires=traefik.service
+After=postgres.service
+
+[Container]
+ContainerName=gitlab
+Image=docker.io/gitlab/gitlab-ce:latest
+Network=lab.network
+Volume=gitlab-data:/var/opt/gitlab
+Volume=gitlab-logs:/var/logs/gitlab
+Volume=gitlab-config:/etc/gitlab
+Environment=GITLAB_OMNIBUS_CONFIG="postgresql['enable'] = false\n\
+gitlab_rails['db_adapter'] = 'postgresql'\n\
+gitlab_rails['db_encoding'] = 'unicode'\n\
+gitlab_rails['db_host'] = 'postgres'\n\
+gitlab_rails['db_password'] = 'password'\n\
+external_url 'https://gitlab.vx'\n\
+nginx['redirect_http_to_https'] = false\n\
+nginx['listen_port'] = 80\n\
+nginx['listen_https'] = false\n\
+gitlab_rails['initial_root_password'] = 'Micro123'\n\
+gitlab_rails['omniauth_allow_single_sign_on'] = ['saml']\n\
+gitlab_rails['omniauth_block_auto_created_users'] = false\n\
+gitlab_rails['omniauth_providers'] = [\n\
+  {\n\
+    name: 'saml',\n\
+    label: 'Keycloak', # optional label for login button, defaults to 'Saml'\n\
+    args: {\n\
+      assertion_consumer_service_url: 'https://gitlab.vx/users/auth/saml/callback',\n\
+      idp_cert_fingerprint: 'fe:da:1e:4e:ec:69:94:05:3d:88:a3:34:63:c0:5f:f3:10:e9:07:e0',\n\
+      idp_sso_target_url: 'https://keycloak.vx/realms/master/protocol/saml',\n\
+      issuer: 'https://gitlab.vx/',\n\
+      name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'\n\
+    }\n\
+  }\n\
+]"
+Label=traefik.enable=true
+Label=traefik.http.routers.gitlab.rule=Host(`gitlab.vx`)
+Label=traefik.http.services.gitlab.loadbalancer.server.port=80
+Label=traefik.http.routers.gitlab.entrypoints=websecure
+Label=traefik.http.routers.gitlab.tls=true
+
+[Install]
+WantedBy=multi-user.target

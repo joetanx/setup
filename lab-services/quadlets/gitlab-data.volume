@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for gitlab data
+After=network.target
+
+[Volume]
+VolumeName=gitlab-data
+
+[Install]
+WantedBy=multi-user.target
