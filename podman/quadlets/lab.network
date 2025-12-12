@@ -1,0 +1,9 @@
+[Unit]
+Description=lab network
+After=network.target
+
+[Network]
+NetworkName=lab
+
+[Install]
+WantedBy=multi-user.target
