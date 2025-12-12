@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for rabbitmq
+After=network.target
+
+[Volume]
+VolumeName=amqpdata
+
+[Install]
+WantedBy=multi-user.target

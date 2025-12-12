@@ -1,0 +1,56 @@
+[Unit]
+Description=opencti container
+Requires=lab-network.service
+Requires=redis.service
+Requires=elasticsearch.service
+Requires=minio.service
+Requires=rabbitmq.service
+Requires=traefik.service
+After=elasticsearch.service
+
+[Container]
+ContainerName=opencti
+Image=docker.io/opencti/platform:latest
+Network=lab.network
+Environment=NODE_OPTIONS=--max-old-space-size=8096
+Environment=APP__PORT=8080
+Environment=APP__BASE_URL=http://localhost:8080
+Environment=APP__ADMIN__EMAIL=admin@lab.vx
+Environment=APP__ADMIN__PASSWORD=password
+Environment=APP__ADMIN__TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
+Environment=APP__APP_LOGS__LOGS_LEVEL=error
+Environment=REDIS__HOSTNAME=redis
+Environment=REDIS__PORT=6379
+Environment=ELASTICSEARCH__URL=http://elasticsearch:9200
+Environment=ELASTICSEARCH__NUMBER_OF_REPLICAS=0
+Environment=MINIO__ENDPOINT=minio
+Environment=MINIO__PORT=9000
+Environment=MINIO__USE_SSL=false
+Environment=MINIO__ACCESS_KEY=opencti
+Environment=MINIO__SECRET_KEY=password
+Environment=RABBITMQ__HOSTNAME=rabbitmq
+Environment=RABBITMQ__PORT=5672
+Environment=RABBITMQ__PORT_MANAGEMENT=15672
+Environment=RABBITMQ__MANAGEMENT_SSL=false
+Environment=RABBITMQ__USERNAME=opencti
+Environment=RABBITMQ__PASSWORD=password
+Environment=PROVIDERS__LOCAL__STRATEGY=LocalStrategy
+Environment=APP__HEALTH_ACCESS_KEY=password
+Label=traefik.enable=true
+Label=traefik.http.routers.opencti.rule=Host(`opencti.vx`)
+Label=traefik.http.services.opencti.loadbalancer.server.port=8080
+Label=traefik.http.routers.opencti.entrypoints=websecure
+Label=traefik.http.routers.opencti.tls=true
+HealthCmd=/usr/bin/wget -qO- http://localhost:8080/health?health_access_key=password
+HealthInterval=15s
+HealthTimeout=1s
+HealthRetries=3
+
+[Service]
+# elasticsearch can take some time to be ready, causing `connect ECONNREFUSED 10.89.0.6:9200`
+# the restart options retries opencti after 10 seconds
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

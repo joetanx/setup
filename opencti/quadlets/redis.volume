@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for redis
+After=network.target
+
+[Volume]
+VolumeName=redisdata
+
+[Install]
+WantedBy=multi-user.target

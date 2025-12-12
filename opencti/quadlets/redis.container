@@ -1,0 +1,17 @@
+[Unit]
+Description=redis container
+Requires=lab-network.service
+After=lab-network.service
+
+[Container]
+ContainerName=redis
+Image=docker.io/library/redis:latest
+Network=lab.network
+Volume=redisdata:/data:Z
+HealthCmd=/usr/local/bin/redis-cli ping
+HealthInterval=15s
+HealthTimeout=1s
+HealthRetries=3
+
+[Install]
+WantedBy=multi-user.target

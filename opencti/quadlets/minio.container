@@ -1,0 +1,20 @@
+[Unit]
+Description=minio container
+Requires=lab-network.service
+After=lab-network.service
+
+[Container]
+ContainerName=minio
+Image=docker.io/minio/minio:latest
+Network=lab.network
+Volume=s3data:/data:Z
+Environment=MINIO_ROOT_USER=opencti
+Environment=MINIO_ROOT_PASSWORD=password
+Exec=server /data
+HealthCmd=/usr/bin/mc ready local
+HealthInterval=15s
+HealthTimeout=1s
+HealthRetries=3
+
+[Install]
+WantedBy=multi-user.target

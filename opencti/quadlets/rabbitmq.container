@@ -1,0 +1,26 @@
+[Unit]
+Description=rabbitmq container
+Requires=lab-network.service
+After=lab-network.service
+
+[Container]
+ContainerName=rabbitmq
+Image=docker.io/library/rabbitmq:management
+Network=lab.network
+Volume=amqpdata:/var/lib/rabbitmq:Z
+Environment=RABBITMQ_DEFAULT_USER=opencti
+Environment=RABBITMQ_DEFAULT_PASS=password
+Environment=RABBITMQ_NODENAME=rabbit01@localhost
+HealthCmd=/opt/rabbitmq/sbin/rabbitmq-diagnostics -q ping
+HealthInterval=15s
+HealthTimeout=1s
+HealthRetries=3
+
+[Service]
+# rabbitmq fails on the first start with `Error when reading /var/lib/rabbitmq/.erlang.cookie: eacces`
+# the restart options retries rabbitmq after 10 seconds
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

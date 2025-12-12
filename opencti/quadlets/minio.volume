@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for minio
+After=network.target
+
+[Volume]
+VolumeName=s3data
+
+[Install]
+WantedBy=multi-user.target

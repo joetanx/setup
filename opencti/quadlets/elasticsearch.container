@@ -1,0 +1,21 @@
+[Unit]
+Description=elasticsearch container
+Requires=lab-network.service
+After=lab-network.service
+
+[Container]
+ContainerName=elasticsearch
+Image=docker.io/elastic/elasticsearch:9.2.2
+Network=lab.network
+Volume=esdata:/usr/share/elasticsearch/data:Z
+Environment=discovery.type=single-node
+Environment=xpack.ml.enabled=false
+Environment=xpack.security.enabled=false
+Environment=logger.org.elasticsearch.discovery=ERROR
+HealthCmd=/usr/bin/curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow >/dev/null || exit 1
+HealthInterval=15s
+HealthTimeout=1s
+HealthRetries=3
+
+[Install]
+WantedBy=multi-user.target

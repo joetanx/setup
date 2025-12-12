@@ -1,0 +1,17 @@
+[Unit]
+Description=threatfox connector container
+Requires=worker.service
+After=worker.service
+
+[Container]
+# https://github.com/OpenCTI-Platform/connectors/tree/master/external-import/threatfox
+ContainerName=connector-threatfox
+Image=docker.io/opencti/connector-threatfox:latest
+Network=lab.network
+Environment=OPENCTI_URL=http://opencti:8080
+Environment=OPENCTI_TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
+Environment=CONNECTOR_ID=192cc4f8-950f-4e16-8779-b4c3a4581605
+Environment=CONNECTOR_NAME=ThreatFox
+
+[Install]
+WantedBy=multi-user.target

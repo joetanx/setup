@@ -1,0 +1,20 @@
+[Unit]
+Description=abuseipdb connector container
+Requires=worker.service
+After=worker.service
+
+[Container]
+# https://github.com/OpenCTI-Platform/connectors/blob/master/external-import/abuseipdb-ipblacklist/
+ContainerName=connector-abuseipdb
+Image=docker.io/opencti/connector-abuseipdb-ipblacklist:latest
+Network=lab.network
+Environment=OPENCTI_URL=http://opencti:8080
+Environment=OPENCTI_TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
+Environment=CONNECTOR_ID=d307f082-16e0-41ff-bb87-fe2dd3950f34
+Environment=CONNECTOR_NAME=AbuseIPDB
+Environment=ABUSEIPDB_API_KEY=YOUR_API_KEY_HERE
+Environment=ABUSEIPDB_TLP_LEVEL=clear
+Environment=ABUSEIPDB_SCORE=75
+
+[Install]
+WantedBy=multi-user.target
