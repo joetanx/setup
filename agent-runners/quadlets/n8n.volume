@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for n8n
+After=network.target
+
+[Volume]
+VolumeName=n8n
+
+[Install]
+WantedBy=multi-user.target
