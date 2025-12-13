@@ -12,7 +12,9 @@ PublishPort=443:443
 Volume=/var/run/podman/podman.sock:/var/run/docker.sock:ro
 Volume=traefik-tls.volume:/etc/traefik/tls:ro
 Volume=traefik-dynamic.volume:/etc/traefik/dynamic:ro
-SecurityLabelDisable=true
+SecurityLabelType=spc_t
+# --security-opt label=type:spc_t, Super Privileged Container type provides permission to connect to container_runtime_t sockets
+# less permissive than SecurityLabelDisable=true (--security-opt label=disable), which turns off label separation for the container for traefik to access podman.sock
 Label=traefik.enable=true
 Label=traefik.http.routers.dashboard.rule=Host(`traefik.vx`)
 Label=traefik.http.routers.dashboard.entrypoints=websecure
