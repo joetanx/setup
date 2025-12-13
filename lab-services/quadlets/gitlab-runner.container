@@ -1,0 +1,14 @@
+[Unit]
+Description=gitlab runner container
+Requires=gitlab.service
+After=gitlab.service
+
+[Container]
+ContainerName=gitlab-runner
+Image=docker.io/gitlab/gitlab-runner:alpine
+Network=lab.network
+Volume=/var/run/podman/podman.sock:/run/podman/podman.sock
+Volume=gitlab-runner-config:/etc/gitlab-runner
+
+[Install]
+WantedBy=multi-user.target

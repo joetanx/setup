@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for gitlab runner config
+After=network.target
+
+[Volume]
+VolumeName=gitlab-runner-config
+
+[Install]
+WantedBy=multi-user.target
