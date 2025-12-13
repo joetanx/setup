@@ -9,6 +9,8 @@ Image=docker.io/gitlab/gitlab-runner:alpine
 Network=lab.network
 Volume=/var/run/podman/podman.sock:/run/podman/podman.sock
 Volume=gitlab-runner-config:/etc/gitlab-runner
+SecurityLabelDisable=true
+# --security-opt label=disable, turn off label separation for the container for gitlab-runner to access podman.sock
 
 [Install]
 WantedBy=multi-user.target
