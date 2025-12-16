@@ -39,9 +39,9 @@ gitlab_rails['omniauth_providers'] = [\n\
 ]"
 Label=traefik.enable=true
 Label=traefik.http.routers.gitlab.rule=Host(`gitlab.vx`)
-Label=traefik.http.services.gitlab.loadbalancer.server.port=80
 Label=traefik.http.routers.gitlab.entrypoints=websecure
 Label=traefik.http.routers.gitlab.tls=true
+Label=traefik.http.services.gitlab.loadbalancer.server.port=80
 
 [Install]
 WantedBy=multi-user.target

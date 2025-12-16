@@ -14,9 +14,14 @@ Volume=mail-systemdata:/app/SystemData:Z
 Environment=TZ=Asia/Singapore
 Label=traefik.enable=true
 Label=traefik.http.routers.mail.rule=Host(`mail.vx`)
-Label=traefik.http.services.mail.loadbalancer.server.port=80
 Label=traefik.http.routers.mail.entrypoints=websecure
+Label=traefik.http.routers.mail.service=mail-http
 Label=traefik.http.routers.mail.tls=true
+Label=traefik.http.services.mail-http.loadbalancer.server.port=80
+Label=traefik.tcp.routers.mail.rule=HostSNI(`*`)
+Label=traefik.tcp.routers.mail.entrypoints=smtp
+Label=traefik.tcp.routers.mail.service=mail-smtp
+Label=traefik.tcp.services.mail-smtp.loadbalancer.server.port=25
 
 [Install]
 WantedBy=multi-user.target
