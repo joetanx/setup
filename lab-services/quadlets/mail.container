@@ -8,7 +8,6 @@ After=traefik.service
 ContainerName=mail
 Image=docker.io/smartertools/smartermail:latest
 Network=lab.network
-PublishPort=25:25
 Volume=mail-data:/app/Data:Z
 Volume=mail-systemdata:/app/SystemData:Z
 Environment=TZ=Asia/Singapore
