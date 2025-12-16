@@ -21,11 +21,13 @@ Label=traefik.http.routers.dashboard.entrypoints=websecure
 Label=traefik.http.routers.dashboard.service=api@internal
 Label=traefik.http.routers.dashboard.tls=true
 Exec=--api.insecure=false \
+--log.level=INFO \
 --api.dashboard=true \
 --providers.docker=true \
 --providers.docker.exposedbydefault=false \
---providers.docker.network=proxy \
+--providers.docker.network=lab \
 --providers.file.directory=/etc/traefik/dynamic \
+--entryPoints.smtp.address=:25 \
 --entryPoints.web.address=:80 \
 --entryPoints.web.http.redirections.entryPoint.to=websecure \
 --entryPoints.web.http.redirections.entryPoint.scheme=https \
