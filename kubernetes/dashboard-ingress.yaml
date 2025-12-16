@@ -1,0 +1,33 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: skipverify
+  namespace: dashboard
+spec:
+  serverName: kubernetes-dashboard-kong-proxy
+  insecureSkipVerify: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dashboard
+  namespace: dashboard
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: kube.vx
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard-kong-proxy
+            port:
+              number: 443
+  tls:
+  - hosts:
+    - kube.vx
+    secretName: dashboard
