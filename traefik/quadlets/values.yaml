@@ -1,0 +1,56 @@
+deployment:
+  kind: DaemonSet
+ports:
+  web:
+    hostPort: 80
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+        permanent: true
+  websecure:
+    hostPort: 443
+additionalArguments:
+- "--api.insecure=true"
+extraObjects:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: traefik-api
+      labels:
+        app.kubernetes.io/name: traefik
+        app.kubernetes.io/instance: traefik-traefik
+    spec:
+      clusterIP: None
+      selector:
+        app.kubernetes.io/name: traefik
+        app.kubernetes.io/instance: traefik-traefik
+      ports:
+      - name: traefik
+        port: 8080
+        targetPort: traefik
+        protocol: TCP
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: ca-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+    spec:
+      rules:
+      - host: traefik.kube.vx
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-api
+                port:
+                  name: traefik
+      tls:
+      - hosts:
+        - traefik.kube.vx
+        secretName: traefik
