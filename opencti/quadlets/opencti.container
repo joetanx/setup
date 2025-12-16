@@ -38,9 +38,9 @@ Environment=PROVIDERS__LOCAL__STRATEGY=LocalStrategy
 Environment=APP__HEALTH_ACCESS_KEY=password
 Label=traefik.enable=true
 Label=traefik.http.routers.opencti.rule=Host(`opencti.vx`)
-Label=traefik.http.services.opencti.loadbalancer.server.port=8080
 Label=traefik.http.routers.opencti.entrypoints=websecure
 Label=traefik.http.routers.opencti.tls=true
+Label=traefik.http.services.opencti.loadbalancer.server.port=8080
 HealthCmd=/usr/bin/wget -qO- http://localhost:8080/health?health_access_key=password
 HealthInterval=15s
 HealthTimeout=1s
