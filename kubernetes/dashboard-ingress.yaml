@@ -14,8 +14,9 @@ metadata:
   namespace: dashboard
   annotations:
     cert-manager.io/cluster-issuer: ca-issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
-  ingressClassName: traefik
   rules:
   - host: kube.vx
     http:
