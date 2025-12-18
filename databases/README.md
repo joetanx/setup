@@ -48,6 +48,8 @@ podman pull docker.io/library/postgres:latest
 systemctl start postgres
 ```
 
+### 2.1. Example commands
+
 Running single-line commands:
 
 ```sh
@@ -61,33 +63,34 @@ podman exec postgres psql "postgres://postgres:password@localhost:5432/postgres"
 Running multi-line commands:
 
 ```sh
-podman exec -i postgres psql "postgres://postgres:password@localhost:5432/postgres" <<EOF
+podman exec -i postgres psql "postgres://postgres:password@localhost:5432/postgres" << EOF
 CREATE USER gitlab WITH PASSWORD 'password';
 CREATE DATABASE gitlabhq_production;
-GRANT ALL PRIVILEGES ON DATABASE gitlabhq_production TO gitlab;
-ALTER USER gitlab WITH SUPERUSER;
+ALTER DATABASE gitlabhq_production OWNER TO gitlab;
 EOF
 ```
 
 ```sh
-podman exec -i postgres psql "postgres://postgres:password@localhost:5432/postgres" <<EOF
+podman exec -i postgres psql "postgres://postgres:password@localhost:5432/postgres" << EOF
 CREATE USER keycloak WITH PASSWORD 'password';
 CREATE DATABASE keycloak;
-GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
-ALTER USER keycloak WITH SUPERUSER;
+ALTER DATABASE keycloak OWNER TO keycloak;
 EOF
 ```
 
-> [!Tip]
+> [!Note]
 >
-> Troubleshooting commands:
+> Since [PostgreSQL 15](https://www.postgresql.org/about/news/postgresql-15-released-2526/), **`CREATE` permission from all users are revoked** except a database owner from the `public` (or default) schema.
 >
-> ```sh
-> user=postgres
-> password=password
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/postgres" -c "SELECT now();"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/postgres" -c "\l+"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/postgres" -c "\du+"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/langflow" -c "\dt+"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/n8n" -c "\dt+"
-> ```
+> `GRANT ALL PRIVILEGES ON DATABASE <database> TO <user>;` is not sufficient
+>
+> `ALTER DATABASE <database> OWNER TO <user>;` is required
+
+### 2.2. Troubleshooting commands
+
+|Command|Description|
+|---|---|
+|`SELECT now()`|• Returns **current timestamp** on the database server (e.g. `2025-12-18 07:58:23.123456+08`)|
+|`\l+`|• Lists all **databases**<br>• `+` shows `Size`, `Tablespace`, and `Description`|
+|`\du+`|• Lists all **roles/users**<br>• `+` shows `Description`|
+|`\dt+`|• Lists all **tables** in current schema<br>• `+` shows `Persistence`, `Access method`, `Size` and `Description`|
