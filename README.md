@@ -1,14 +1,11 @@
-|Topic|Link|
+|Topic|Description|
 |---|---|
-|Notes on Docker|https://github.com/joetanx/setup/blob/main/docker-notes.md|
-|Notes on Traefik|https://github.com/joetanx/setup/blob/main/traefik-notes.md|
-|Setup nginx for TLS offloading<br>(both server install and container methods)|https://github.com/joetanx/setup/blob/main/nginx.md|
-|Notes on making web or REST API requests using PowerShell and cURL<br>+ data structure and representation in PowerShell|https://github.com/joetanx/setup/blob/main/web-request-notes.md|
-|Setup Elastic SOC lab + Suricata and CyberArk Integration|https://github.com/joetanx/setup/blob/main/soc-lab.md|
-|Setup standalone Conjur Enterprise leader on Podman on RHEL 9.1 with base policies for MySQL and AWS credentials|https://github.com/joetanx/setup/blob/main/conjur.md|
-|Setup MySQL server with sample world database|https://github.com/joetanx/setup/blob/main/mysql.md|
-|Setup PostgreSQL server|https://github.com/joetanx/setup/blob/main/postgres.md|
-|Setup single-node Kubernetes cluster running on Red Hat Enterprise Linux 9.0 with CRI-O as the container runtime interface and Flannel networking|https://github.com/joetanx/setup/blob/main/cri-o-kube.md|
-|Setup single-node Openshift|https://github.com/joetanx/setup/blob/main/single-node-openshift.md|
-|Setup GitLab community edition|https://github.com/joetanx/setup/blob/main/gitlab.md|
-|Setup Keycloak|https://github.com/joetanx/setup/blob/main/keycloak.md|
+|[Podman](/podman/)|Podman setup and notes on the nuances of container networking and volume mounts|
+|[Kubernetes](/kubernetes/)|Single-node Kubernetes setup on Ubuntu with Helm, cert-manager, Traefik and Kubernetes dashboard|
+|[Traefik](/traefik/)|Setup Traefik for lab traffic routing; nuances on Traefik routing under [routing-notes](/traefik/routing-notes.md)|
+|[Nginx](/nginx/)|Setup Nginx for reverse proxy and TLS offloading|
+|[Databases](/databases/)|Running PostgreSQL in container for the lab services (and MySQL maybe in the future)|
+|[Agent Runners](agent-runners)|Setting up n8n and Langflow for agentic AI lab|
+|[OpenCTI](/opencti/)|Setup OpenCTI lab and various connectors|
+[[Lab Services](/lab-services/)|Setup demo services: SmartMail SMTP, GitLab CI/CD and Keycloak IdP|
+|[Web Request](/notes/web-request.md)|Notes on using cURL and PowerShell to make web requests|
