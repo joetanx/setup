@@ -36,23 +36,28 @@ flowchart TD
 Create the respective databases for n8n and Langflow:
 
 ```sh
-podman exec postgres psql "postgres://postgres:password@localhost:5432/postgres" -c "CREATE DATABASE langflow;"
-podman exec postgres psql "postgres://postgres:password@localhost:5432/postgres" -c "CREATE DATABASE n8n;"
+podman exec -i postgres psql "postgres://postgres:password@localhost:5432/postgres" << EOF
+CREATE USER n8n WITH PASSWORD 'password';
+CREATE DATABASE n8n;
+ALTER DATABASE n8n OWNER TO n8n;
+EOF
 ```
 
-> [!Tip]
+```sh
+podman exec -i postgres psql "postgres://postgres:password@localhost:5432/postgres" << EOF
+CREATE USER langflow WITH PASSWORD 'password';
+CREATE DATABASE langflow;
+ALTER DATABASE langflow OWNER TO langflow;
+EOF
+```
+
+> [!Note]
 >
-> Troubleshooting commands:
+> Since [PostgreSQL 15](https://www.postgresql.org/about/news/postgresql-15-released-2526/), **`CREATE` permission from all users are revoked** except a database owner from the `public` (or default) schema.
 >
-> ```sh
-> user=postgres
-> password=password
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/postgres" -c "SELECT now();"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/postgres" -c "\l+"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/postgres" -c "\du+"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/langflow" -c "\dt+"
-> podman exec postgres psql "postgres://$user:$password@localhost:5432/n8n" -c "\dt+"
-> ```
+> `GRANT ALL PRIVILEGES ON DATABASE <database> TO <user>;` is not sufficient
+>
+> `ALTER DATABASE <database> OWNER TO <user>;` is required
 
 ## 3. n8n
 
