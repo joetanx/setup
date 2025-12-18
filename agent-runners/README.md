@@ -59,28 +59,34 @@ EOF
 >
 > `ALTER DATABASE <database> OWNER TO <user>;` is required
 
-## 3. n8n
+## 3. Setup and run
 
-Pull container image (optional) and start service:
-
-```sh
-podman pull docker.n8n.io/n8nio/n8n:latest
-systemctl start n8n
-```
-
-## 4. Langflow
-
-Pull container image (optional) and start service:
+ Download quadlet files and pull container images:
 
 ```sh
+for item in langflow.volume langflow.container n8n.volume n8n.container; do
+  curl -sL --output-dir /etc/containers/systemd/ -O https://github.com/joetanx/setup/raw/refs/heads/main/agent-runners/quadlets/$item
+done
+systemctl daemon-reload
 podman pull docker.io/langflowai/langflow:latest
-systemctl start langflow
+podman pull docker.n8n.io/n8nio/n8n:latest
 ```
 
-## 5. Check status
+Start services:
+
+```sh
+systemctl start n8n langflow
+```
+
+Check statuses:
 
 ```sh
 systemctl status n8n langflow
+```
+
+Check container logs:
+
+```sh
 podman logs n8n
 podman logs langflow
 ```
