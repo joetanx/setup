@@ -12,6 +12,7 @@ Environment=OPENCTI_URL=http://opencti:8080
 Environment=OPENCTI_TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
 Environment=CONNECTOR_ID=db6cf420-4e39-4c77-9781-cd37a84571ea
 Environment=CONNECTOR_NAME=AlienVault
+Environment=CONNECTOR_DURATION_PERIOD=PT12H
 Environment=ALIENVAULT_BASE_URL=https://otx.alienvault.com
 Environment=ALIENVAULT_API_KEY=YOUR_API_KEY_HERE
 Environment=ALIENVAULT_TLP=White
