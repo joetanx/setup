@@ -17,7 +17,7 @@ Environment=APP__PORT=8080
 Environment=APP__BASE_URL=http://localhost:8080
 Environment=APP__ADMIN__EMAIL=admin@lab.vx
 Environment=APP__ADMIN__PASSWORD=password
-Environment=APP__ADMIN__TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
+Environment=APP__ADMIN__TOKEN=YOUR_OPENCTI_TOKEN_HERE
 Environment=APP__APP_LOGS__LOGS_LEVEL=error
 Environment=REDIS__HOSTNAME=redis
 Environment=REDIS__PORT=6379

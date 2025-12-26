@@ -9,7 +9,7 @@ ContainerName=connector-urlhaus
 Image=docker.io/opencti/connector-urlhaus:latest
 Network=lab.network
 Environment=OPENCTI_URL=http://opencti:8080
-Environment=OPENCTI_TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
+Environment=OPENCTI_TOKEN=YOUR_OPENCTI_TOKEN_HERE
 Environment=CONNECTOR_ID=126a8a25-6846-465a-ba92-94fe8d8b8c64
 Environment=CONNECTOR_NAME=URLhaus
 Environment=URLHAUS_INTERVAL=1

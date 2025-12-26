@@ -9,7 +9,7 @@ ContainerName=connector-virustotal
 Image=docker.io/opencti/connector-virustotal:latest
 Network=lab.network
 Environment=OPENCTI_URL=http://opencti:8080
-Environment=OPENCTI_TOKEN=27cf31af-5f0a-40b0-b1eb-9fcf1d0a1c3d
+Environment=OPENCTI_TOKEN=YOUR_OPENCTI_TOKEN_HERE
 Environment=CONNECTOR_ID=ceb59136-84d2-4425-a627-f63b2f225573
 Environment=CONNECTOR_NAME=VirusTotal
 Environment=VIRUSTOTAL_TOKEN=YOUR_API_KEY_HERE
