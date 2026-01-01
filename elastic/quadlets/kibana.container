@@ -1,0 +1,18 @@
+[Unit]
+Description=kibana container
+Requires=elasticsearch.service
+After=elasticsearch.service
+
+[Container]
+ContainerName=kibana
+Image=docker.io/elastic/kibana:9.2.3
+Network=lab.network
+Environment=SERVER_NAME=kibana.vx
+Environment=ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+Label=traefik.enable=true
+Label=traefik.http.routers.kibana.rule=Host(`kibana.vx`)
+Label=traefik.http.routers.kibana.entrypoints=websecure
+Label=traefik.http.routers.kibana.tls=true
+
+[Install]
+WantedBy=multi-user.target

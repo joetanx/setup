@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for logstash config
+After=network.target
+
+[Volume]
+VolumeName=logstash-config
+
+[Install]
+WantedBy=multi-user.target

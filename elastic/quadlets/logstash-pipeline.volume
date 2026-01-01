@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for logstash pipeline
+After=network.target
+
+[Volume]
+VolumeName=logstash-pipeline
+
+[Install]
+WantedBy=multi-user.target
