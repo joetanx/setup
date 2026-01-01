@@ -4,7 +4,7 @@ Requires=elasticsearch.service
 After=elasticsearch.service
 
 [Container]
-ContainerName=elasticsearch
+ContainerName=logstash
 Image=docker.io/elastic/logstash:9.2.3
 Network=lab.network
 PublishPort=1514:1514
