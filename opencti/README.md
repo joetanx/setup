@@ -49,7 +49,9 @@ flowchart TD
 Download the quadlet unit files and reload systemd:
 
 ```sh
-for item in elasticsearch.container elasticsearch.volume minio.container minio.volume opencti.container rabbitmq.container rabbitmq.volume redis.container redis.volume worker.container; do
+curl -sL --output-dir /etc/containers/systemd/ -O https://github.com/joetanx/setup/raw/refs/heads/main/elastic/quadlets/elasticsearch.container
+curl -sL --output-dir /etc/containers/systemd/ -O https://github.com/joetanx/setup/raw/refs/heads/main/elastic/quadlets/elasticsearch.volume
+for item in minio.container minio.volume opencti.container rabbitmq.container rabbitmq.volume redis.container redis.volume worker.container; do
   curl -sL --output-dir /etc/containers/systemd/ -O https://github.com/joetanx/setup/raw/refs/heads/main/opencti/quadlets/$item
 done
 systemctl daemon-reload
@@ -59,7 +61,7 @@ Pull container image (optional) and start service:
 
 ```sh
 podman pull docker.io/library/redis:latest
-podman pull docker.io/elastic/elasticsearch:9.2.2
+podman pull docker.io/elastic/elasticsearch:9.2.3
 podman pull docker.io/minio/minio:latest
 podman pull docker.io/library/rabbitmq:management
 podman pull docker.io/opencti/platform:latest
