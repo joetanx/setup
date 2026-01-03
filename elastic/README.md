@@ -33,12 +33,10 @@ flowchart TD
   end
   subgraph "Volumes"
     A1(elasticsearch)
-    B1(logstash-config)
-    B2(logstash-pipeline)
+    B1(logstash)
   end
   A --> A1
   B --> B1
-  B --> B2
 ```
 
 ### 1.3. Logs flow
