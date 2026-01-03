@@ -1,0 +1,9 @@
+[Unit]
+Description=volume for logstash
+After=network.target
+
+[Volume]
+VolumeName=lsdata
+
+[Install]
+WantedBy=multi-user.target

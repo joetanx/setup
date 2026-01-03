@@ -9,8 +9,7 @@ Image=docker.io/elastic/logstash:9.2.3
 Network=lab.network
 PublishPort=1514:1514
 PublishPort=5044:5044
-Volume=logstash-config:/usr/share/logstash/config:Z
-Volume=logstash-pipeline:/usr/share/logstash/pipeline:Z
+Volume=lsdata:/usr/share/logstash:Z
 Environment=xpack.monitoring.enabled=false
 
 [Install]
