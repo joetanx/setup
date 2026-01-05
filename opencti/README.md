@@ -71,11 +71,9 @@ systemctl start worker
 
 > [!Tip]
 >
-> Notice that only worker needs to be started
-> 
-> In the systemd uni file, worker `requires` opencti, which `requires` redis, elasticsearch, minio and rabbitmq
+> The `worker` systemd unit file is configured with `requires` for `redis`, `elasticsearch`, `minio` and `rabbitmq`
 >
-> This chain of `requires` means starting worker will automatically start all the `requires`
+> This chain of `requires` means starting `worker` will automatically start all the `requires`
 >
 > ```mermaid
 > flowchart LR
