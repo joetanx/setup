@@ -131,7 +131,7 @@ https://github.com/joetanx/setup/blob/8a48cfe239c665606e76350c7ab162f8de639d5f/e
 
 > [!Tip]
 >
-> logger sends syslog as RFC 5424, to debug as RFC 3164 or if using [logstash syslog input plugin](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-syslog), add `--rfc3164` option to logger
+> logger sends in RFC 5424 by default, to debug as RFC 3164 or if using [logstash syslog input plugin](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-syslog), add `--rfc3164` option to logger
 
 Test send syslog to logstash:
 
@@ -221,7 +221,7 @@ Example syslog elasticsearch entry:
 
 > [!Tip]
 >
-> rsyslog sends in RFC 3164 by default, `template="RSYSLOG_SyslogProtocol23Format"` uses template for RFC 5424
+> rsyslog sends in RFC 3164 by default, the `RSYSLOG_SyslogProtocol23Format` template sends in RFC 5424
 
 Install rsyslog and setup rsyslog config file to send to logstash:
 
