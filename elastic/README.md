@@ -44,29 +44,25 @@ flowchart TD
 ```mermaid
 flowchart TD
   subgraph Windows data sources
-    A1(With Winlogbeat)
-    A2(Without Winlogbeat) 
+    W1(With Winlogbeat)
+    W2(Without Winlogbeat) 
   end
-  A3(Windows Event Collector<br>with Winlogbeat)
-  B(Linux)
+  W3(Windows Event Collector<br>with Winlogbeat)
+  L(Linux)
   subgraph logstash
-    L1(Input:<br>tcp 1514)
-    L2(Input:<br>beats 5044)
-    F1(Filter:<br>syslog RFC 5424)
-    O1(Output:<br>elasticsearch)
-    O2(Output:<br>Sentinel plugin)
-    L1 --> F1
-    F1 --> O1
-    F1 --> O2
-    L2 ---> O1
-    L2 ---> O2
+    I1(Input:<br>tcp 1514)
+    I2(Input:<br>beats 5044)
+    F(Filter:<br>syslog RFC 5424)
+    O(Output:<br>elasticsearch)
+    I1 --> F
+    F --> O
+    I2 ---> O
   end
-  A1 -->|beats| L2
-  A2 -->|Windows Event Forwarding| A3
-  A3 -->|beats| L2
-  B --->|syslog| L1
-  O1 -->|:9200| E(Elasticsearch)
-  O2 -->|DCR| S(Sentinel)
+  W1 -->|beats| I2
+  W2 -->|Windows Event Forwarding| W3
+  W3 -->|beats| I2
+  L --->|syslog| I1
+  O -->|:9200| E(Elasticsearch)
 ```
 
 ## 2. Setup Elastic stack
